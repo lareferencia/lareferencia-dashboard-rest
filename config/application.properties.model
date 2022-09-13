@@ -24,13 +24,6 @@ default.solr.server = http://localhost:8983/solr
 #config path
 config.dir.path = config
 
-# metadata store
-metadata.store.class = MetadataStoreSQLImpl
-
-# hashing method used by metadata store: MD5Hashing, XXHash64Hashing 
-hashing.algorithm.class = MD5Hashing
-
-
 # Validation Stats config
 vstats.solr.server=http://localhost:8983/solr
 vstats.solr.core=vstats
