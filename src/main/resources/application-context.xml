@@ -38,10 +38,11 @@
 
 
 	<bean id="snapshotLogService" class="org.lareferencia.backend.services.SnapshotLogService"></bean>
+	
 	<bean id="metadataRecordStore" class="org.lareferencia.core.metadata.MetadataRecordStoreServiceImpl"></bean>
-	<bean id="metadataStore" class="org.lareferencia.core.metadata.${metadata.store.class}"></bean>
-	<bean id="hashingHelper" class="org.lareferencia.core.util.hashing.${hashing.algorithm.class}"></bean>
-
+	
+	<bean id="metadataStore" class="org.lareferencia.core.metadata.MetadataStoreSQLImpl" scope="singleton"></bean>
+	<bean id="hashingHelper" class="org.lareferencia.core.util.hashing.XXHash64Hashing" scope="singleton"></bean>
 
 	<bean id="dateHelper" class="org.lareferencia.core.util.date.DateHelper">
         <property name="dateTimeFormatters">
