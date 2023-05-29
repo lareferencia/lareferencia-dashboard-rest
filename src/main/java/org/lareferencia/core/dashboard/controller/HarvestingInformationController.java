@@ -24,12 +24,14 @@ package org.lareferencia.core.dashboard.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.lareferencia.core.dashboard.security.ISecurityService;
 import org.lareferencia.core.dashboard.service.HarvesterInfoServiceException;
 import org.lareferencia.core.dashboard.service.IHarvestingInformationService;
 import org.lareferencia.core.dashboard.service.IHarvestingResult;
 import org.lareferencia.core.dashboard.service.IHarvestingSource;
-import org.lareferencia.core.util.DateUtil;
+import org.lareferencia.core.dashboard.service.impl.v3.HarvestingInformationService;
 import org.lareferencia.core.util.date.DateHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -41,7 +43,6 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
@@ -51,13 +52,15 @@ import io.swagger.annotations.ApiResponses;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Date;
 
 @RestController
 @Api(value = "Harvesting Information", tags = "Harvesting")
 @RequestMapping("/api/v2/harvesting/source/")
 @CrossOrigin
 public class HarvestingInformationController {
+
+	private static Logger logger = LogManager.getLogger(HarvestingInformationController.class);
+
 
 	@Autowired
 	IHarvestingInformationService hService;
@@ -131,6 +134,9 @@ public class HarvestingInformationController {
 	HttpEntity<Page<IHarvestingResult>> getHarvestingHistoryByAcronym(
 			@PathVariable("sourceAcronym") String sourceAcronym, Pageable pageable)
 			throws HarvesterInfoServiceException {
+
+		logger.info("getHarvestingHistoryByAcronym: " + sourceAcronym);
+		logger.info("getHarvestingHistoryByAcronym: " + pageable);
 
 		Page<IHarvestingResult> result = hService.getHarvestingHistoryBySourceAcronym(sourceAcronym, pageable);
 
