@@ -66,7 +66,7 @@ public class HarvestingInformationService implements IHarvestingInformationServi
 
 		// if no sort is defined, sort by end date descending
 		if (pageable.getSort().isEmpty()) 
-        	pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("endDate").descending());
+        	pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("endTime").descending());
     
 
 		// get the page
@@ -88,7 +88,7 @@ public class HarvestingInformationService implements IHarvestingInformationServi
 
 		// if no sort is defined, sort by end date descending
 		if (pageable.getSort().isEmpty())
-			pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("endDate").descending());
+			pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("endTime").descending());
 
 
 		// get the page
