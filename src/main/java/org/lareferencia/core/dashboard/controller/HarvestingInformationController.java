@@ -141,9 +141,6 @@ public class HarvestingInformationController {
 			@PathVariable("sourceAcronym") String sourceAcronym, Pageable pageable)
 			throws HarvesterInfoServiceException {
 
-		logger.info("getHarvestingHistoryByAcronym: " + sourceAcronym);
-		logger.info("getHarvestingHistoryByAcronym: " + pageable);
-
 		try {
 			Page<IHarvestingResult> result = hService.getHarvestingHistoryBySourceAcronym(sourceAcronym, pageable);
 			return new ResponseEntity<Page<IHarvestingResult>>(result, HttpStatus.OK);
