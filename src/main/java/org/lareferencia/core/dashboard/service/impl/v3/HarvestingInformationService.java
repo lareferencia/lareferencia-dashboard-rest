@@ -62,8 +62,8 @@ public class HarvestingInformationService implements IHarvestingInformationServi
 
 		Network network = findHarvestingSourceByAcronym(sourceAcronym);
 
-		//Page<NetworkSnapshot> page = snapshotRepository.findByNetwork(network, pageable);
-		Page<NetworkSnapshot> page = snapshotRepository.findByNetworkAndStatusOrderByEndTimeDesc(network, SnapshotStatus.VALID, pageable);
+		// 
+		Page<NetworkSnapshot> page = snapshotRepository.findByNetworkAndStatus(network, SnapshotStatus.VALID, pageable);
 
 		Page<IHarvestingResult> results = new PageImpl<IHarvestingResult>(
 				page.getContent().stream().map(o -> new NetworkSnapshot2IHarvestingResultAdapter(o)).collect(Collectors.toList()),
