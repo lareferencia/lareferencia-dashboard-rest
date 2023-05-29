@@ -24,7 +24,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -62,8 +64,14 @@ public class HarvestingInformationService implements IHarvestingInformationServi
 
 		Network network = findHarvestingSourceByAcronym(sourceAcronym);
 
-		//Page<NetworkSnapshot> page = snapshotRepository.findByNetwork(network, pageable);
-		Page<NetworkSnapshot> page = snapshotRepository.findByNetworkAndStatusOrderByEndTimeDesc(network, SnapshotStatus.VALID, pageable);
+		// if no sort is defined, sort by end date descending
+		if (pageable.getSort().isEmpty()) 
+        	pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("endDate").descending());
+    
+
+		// get the page
+		// TODO: add filter by status
+		Page<NetworkSnapshot> page = snapshotRepository.findByNetworkAndStatus(network, SnapshotStatus.VALID, pageable);
 
 		Page<IHarvestingResult> results = new PageImpl<IHarvestingResult>(
 				page.getContent().stream().map(o -> new NetworkSnapshot2IHarvestingResultAdapter(o)).collect(Collectors.toList()),
@@ -72,12 +80,19 @@ public class HarvestingInformationService implements IHarvestingInformationServi
 		return results;
 	}
 	
+
 	public Page<IHarvestingResult> getHarvestingHistoryBySourceAcronym(String sourceAcronym, LocalDateTime startDate, LocalDateTime endDate,  Pageable pageable)
 			throws HarvesterInfoServiceException {
 
 		Network network = findHarvestingSourceByAcronym(sourceAcronym);
 
-		Page<NetworkSnapshot> page = snapshotRepository.findByNetworkIdAndDate(network.getId(), startDate, endDate, pageable);
+		// if no sort is defined, sort by end date descending
+		if (pageable.getSort().isEmpty())
+			pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("endDate").descending());
+
+
+		// get the page
+		Page<NetworkSnapshot> page = snapshotRepository.findByNetworkAndStatusAndStartTimeAndEndTime(network, SnapshotStatus.VALID, startDate, endDate, pageable);
 
 		Page<IHarvestingResult> results = new PageImpl<IHarvestingResult>(
 				page.getContent().stream().map(o -> new NetworkSnapshot2IHarvestingResultAdapter(o)).collect(Collectors.toList()),
