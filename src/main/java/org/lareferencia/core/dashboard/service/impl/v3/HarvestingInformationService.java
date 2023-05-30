@@ -92,7 +92,7 @@ public class HarvestingInformationService implements IHarvestingInformationServi
 
 
 		// get the page
-		Page<NetworkSnapshot> page = snapshotRepository.findByNetworkAndStatusAndStartTimeAndEndTime(network, SnapshotStatus.VALID, startDate, endDate, pageable);
+		Page<NetworkSnapshot> page = snapshotRepository.findByNetworkAndStatusAndEndTimeBetween(network, SnapshotStatus.VALID, startDate, endDate, pageable);
 
 		Page<IHarvestingResult> results = new PageImpl<IHarvestingResult>(
 				page.getContent().stream().map(o -> new NetworkSnapshot2IHarvestingResultAdapter(o)).collect(Collectors.toList()),
