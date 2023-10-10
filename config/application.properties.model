@@ -3,7 +3,6 @@ spring.datasource.url=jdbc:postgresql://localhost:5432/lrharvester
 spring.datasource.username=lrharvester
 spring.datasource.password=lrharvester
 
-#rest port
 server.port=8092
 
 spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults = false
@@ -42,7 +41,7 @@ rest.lareferencia.metadata.licenseurl="https://www.gnu.org/licenses/"
 #keycloak.enabled = false
 
 ## Authentication
-keycloak.auth-server-url = http://demo.lareferencia.info:8280/auth
+keycloak.auth-server-url = http://demo.lareferencia.info:8280
 keycloak.realm = lareferencia
 keycloak.resource = dashboard-lareferencia-api
 keycloak.ssl-required = none
