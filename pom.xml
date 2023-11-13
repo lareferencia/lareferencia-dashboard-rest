@@ -29,7 +29,7 @@
     <parent>
         <groupId>org.lareferencia</groupId>
         <artifactId>lareferencia-parent</artifactId>
-        <version>4.2.1</version>
+        <version>4.2.2</version>
     </parent>
 	
 
@@ -44,7 +44,7 @@
 		<dependency>
             <groupId>org.lareferencia</groupId>
             <artifactId>lareferencia-core-lib</artifactId>
-            <version>4.2.1</version>
+            <version>4.2.2</version>
         </dependency>
 
 
