@@ -21,6 +21,7 @@ import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
 
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.RoleResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
@@ -117,13 +118,22 @@ public class KeycloakAdmin {
     return keycloak.realm(realm).users().delete(getUserId(username));
   }
   
-  public List<String> listUsers (String role){
+  public List<String> listUsers (String roleName){
 		
-		List<String> usernames = new ArrayList<String>();		
-		Set<UserRepresentation> users = keycloak.realm(realm).roles().get(role).getRoleUserMembers();
-		users.forEach(user -> usernames.add(user.getUsername()));
+		// List<String> usernames = new ArrayList<String>();		
+		// Set<UserRepresentation> users = keycloak.realm(realm).roles().get(role).getRoleUserMembers();
+
+		// users.forEach(user -> usernames.add(user.getUsername()));
 		
-		return usernames;
+		// return usernames;
+
+		List<String> usernames = new ArrayList<>();
+    	RoleResource roleResource = keycloak.realm(realm).roles().get(roleName);
+   		List<UserRepresentation> users = roleResource.getUserMembers();
+
+    	users.forEach(user -> usernames.add(user.getUsername()));
+
+    	return usernames;
 	}
 	
 	public Response createGroup (Map<String, String> groupInfo, String[] groupAttributes){
