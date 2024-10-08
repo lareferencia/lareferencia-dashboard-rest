@@ -20,8 +20,11 @@ import java.util.Set;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
 
+import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.RoleResource;
+import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
@@ -32,341 +35,395 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class KeycloakAdmin {
 
-  private String serverUrl;
+	private static final long TOKEN_EXPIRY_THRESHOLD = 60;
+	private String serverUrl;
 	private String realm;
 	private String tokenEndpoint;
 	private String clientId;
-  private String clientSecret;
-  
-  private final Keycloak keycloak;
-  
-  public KeycloakAdmin (String serverUrl, String realm, String tokenEndpoint, String clientId, String clientSecret) {
-  
-    this.serverUrl = serverUrl;
-	  this.realm = realm;
-    this.tokenEndpoint = tokenEndpoint;
-	  this.clientId = clientId;
-    this.clientSecret = clientSecret;
-    
-    keycloak = getKeycloakInstance();
-  }
- 
-  public Response createUser (Map<String, String> userInfo, String[] defaultRoles, String[] userAttributes){	
-   
+	private String clientSecret;
+
+	private final Keycloak keycloak;
+
+	private AccessTokenResponse tokenResponse;
+
+	public KeycloakAdmin(String serverUrl, String realm, String tokenEndpoint, String clientId, String clientSecret) {
+
+		this.serverUrl = serverUrl;
+		this.realm = realm;
+		this.tokenEndpoint = tokenEndpoint;
+		this.clientId = clientId;
+		this.clientSecret = clientSecret;
+
+		this.keycloak = KeycloakBuilder.builder()
+				.serverUrl(serverUrl)
+				.realm(realm)
+				.grantType(OAuth2Constants.CLIENT_CREDENTIALS)
+				.clientId(clientId)
+				.clientSecret(clientSecret)
+				.build();
+
+		tokenResponse = keycloak.tokenManager().getAccessToken();
+
+	}
+
+	private void refreshTokenIfNeeded() {
+		if (tokenResponse.getExpiresIn() < TOKEN_EXPIRY_THRESHOLD) {
+			this.tokenResponse = keycloak.tokenManager().refreshToken();
+		}
+	}
+
+	private String getAuthToken() {
+
+	public Response createUser(Map<String, String> userInfo, String[] defaultRoles, String[] userAttributes) {
+
+		refreshTokenIfNeeded();
+
 		UserRepresentation user = buildUserRepresentation(userInfo, userAttributes, false);
 		Response response = keycloak.realm(realm).users().create(user);
-   
-		//Add default roles to user
+
+		// Add default roles to user
 		List<RoleRepresentation> roles = new ArrayList<RoleRepresentation>();
-				
-		for (String role : defaultRoles){
-			roles.add(keycloak.realm(realm).roles().get(role).toRepresentation());	
+
+		for (String role : defaultRoles) {
+			roles.add(keycloak.realm(realm).roles().get(role).toRepresentation());
 		}
-		
+
 		String responsePath = response.getLocation().toString();
 		String userId = responsePath.substring(responsePath.lastIndexOf('/') + 1);
 		keycloak.realm(realm).users().get(userId).roles().realmLevel().add(roles);
-   
-   return response;
+
+		return response;
 	}
-	
-	public Map<String, String> getUserInfo (String username, String[] userAttributes){
-		
-    UserRepresentation user = keycloak.realm(realm).users().get(getUserId(username)).toRepresentation();
-    Map<String, List<String>> attributes = user.getAttributes();
+
+	public Map<String, String> getUserInfo(String username, String[] userAttributes) {
+
+		refreshTokenIfNeeded();
+
+		UserRepresentation user = keycloak.realm(realm).users().get(getUserId(username)).toRepresentation();
+		Map<String, List<String>> attributes = user.getAttributes();
 		List<String> defaultValue = Arrays.asList("");
 
 		Map<String, String> userInfo = new HashMap<String, String>();
 		userInfo.put("username", user.getUsername());
 		userInfo.put("first_name", user.getFirstName());
 		userInfo.put("last_name", user.getLastName());
-		userInfo.put("email", user.getEmail());	
-		
-		for (String attribute : userAttributes){
-			userInfo.put(attribute, Objects.isNull(attributes) ? "" : attributes.getOrDefault(attribute, defaultValue).get(0));
+		userInfo.put("email", user.getEmail());
+
+		for (String attribute : userAttributes) {
+			userInfo.put(attribute,
+					Objects.isNull(attributes) ? "" : attributes.getOrDefault(attribute, defaultValue).get(0));
 		}
-	
+
 		return userInfo;
 	}
- 
-  public List<String> getUserGroups (String username){
-		
+
+	public List<String> getUserGroups(String username) {
+
+		refreshTokenIfNeeded();
+
 		List<String> userGroups = new ArrayList<String>();
 		List<GroupRepresentation> groups = keycloak.realm(realm).users().get(getUserId(username)).groups();
-		
+
 		for (GroupRepresentation group : groups) {
 			userGroups.add(group.getName());
 		}
-		
+
 		return userGroups;
 	}
-	
-	public void updateUserInfo (String username, Map<String, String> userInfo, String[] userAttributes){
-		
+
+	public void updateUserInfo(String username, Map<String, String> userInfo, String[] userAttributes) {
+
+		refreshTokenIfNeeded();
+
 		UserRepresentation newInfo = buildUserRepresentation(userInfo, userAttributes, true);
 		keycloak.realm(realm).users().get(getUserId(username)).update(newInfo);
 	}
-	
-	public void resetUserPassword (String username, String password){
-		
+
+	public void resetUserPassword(String username, String password) {
+
+		refreshTokenIfNeeded();
+
 		CredentialRepresentation credential = buildUserCredential(password, true);
 		keycloak.realm(realm).users().get(getUserId(username)).resetPassword(credential);
 	}
-	
-	public Response deleteUser (String username){
-  
-    return keycloak.realm(realm).users().delete(getUserId(username));
-  }
-  
-  public List<String> listUsers (String roleName){
-		
-		// List<String> usernames = new ArrayList<String>();		
-		// Set<UserRepresentation> users = keycloak.realm(realm).roles().get(role).getRoleUserMembers();
 
-		// users.forEach(user -> usernames.add(user.getUsername()));
-		
-		// return usernames;
+	public Response deleteUser(String username) {
+
+		refreshTokenIfNeeded();
+
+		return keycloak.realm(realm).users().delete(getUserId(username));
+	}
+
+	public List<String> listUsers(String roleName) {
+
+		refreshTokenIfNeeded();
 
 		List<String> usernames = new ArrayList<>();
-    	RoleResource roleResource = keycloak.realm(realm).roles().get(roleName);
-   		List<UserRepresentation> users = roleResource.getUserMembers();
+		RoleResource roleResource = keycloak.realm(realm).roles().get(roleName);
+		List<UserRepresentation> users = roleResource.getUserMembers();
 
-    	users.forEach(user -> usernames.add(user.getUsername()));
+		users.forEach(user -> usernames.add(user.getUsername()));
 
-    	return usernames;
+		return usernames;
 	}
-	
-	public Response createGroup (Map<String, String> groupInfo, String[] groupAttributes){
-		
-    GroupRepresentation group = buildGroupRepresentation(groupInfo, groupAttributes);
-		
-    return keycloak.realm(realm).groups().add(group);
+
+	public Response createGroup(Map<String, String> groupInfo, String[] groupAttributes) {
+
+		refreshTokenIfNeeded();
+
+
+		GroupRepresentation group = buildGroupRepresentation(groupInfo, groupAttributes);
+
+		return keycloak.realm(realm).groups().add(group);
 	}
- 
-  public Map<String, String> getGroupInfo (String groupname, String[] groupAttributes){
-		
+
+	public Map<String, String> getGroupInfo(String groupname, String[] groupAttributes) {
+
+		refreshTokenIfNeeded();
+
 		GroupRepresentation group = keycloak.realm(realm).getGroupByPath("/" + groupname);
-    Map<String, List<String>> attributes = group.getAttributes();
+		Map<String, List<String>> attributes = group.getAttributes();
 		List<String> defaultValue = Arrays.asList("");
-		
+
 		Map<String, String> groupInfo = new HashMap<String, String>();
 		groupInfo.put("name", group.getName());
-   
-    for (String attribute : groupAttributes){
-      groupInfo.put(attribute, Objects.isNull(attributes) ? "" : attributes.getOrDefault(attribute, defaultValue).get(0));
+
+		for (String attribute : groupAttributes) {
+			groupInfo.put(attribute,
+					Objects.isNull(attributes) ? "" : attributes.getOrDefault(attribute, defaultValue).get(0));
 		}
-	
+
 		return groupInfo;
 	}
- 
-  public List<String> getGroupMembers (String groupname){
-		
+
+	public List<String> getGroupMembers(String groupname) {
+
+		refreshTokenIfNeeded();
+
 		List<String> groupMembers = new ArrayList<String>();
-    GroupRepresentation group = keycloak.realm(realm).getGroupByPath("/" + groupname);
+		GroupRepresentation group = keycloak.realm(realm).getGroupByPath("/" + groupname);
 		List<UserRepresentation> members = keycloak.realm(realm).groups().group(group.getId()).members();
-		
+
 		for (UserRepresentation member : members) {
 			groupMembers.add(member.getUsername());
 		}
-		
+
 		return groupMembers;
 	}
-	
-	 public void updateGroupInfo (String groupname, Map<String, String> groupInfo, String[] groupAttributes){
-		
+
+	public void updateGroupInfo(String groupname, Map<String, String> groupInfo, String[] groupAttributes) {
+
+		refreshTokenIfNeeded();
+
 		GroupRepresentation group = keycloak.realm(realm).getGroupByPath("/" + groupname);
-    GroupRepresentation newInfo = buildGroupRepresentation(groupInfo, groupAttributes);
+		GroupRepresentation newInfo = buildGroupRepresentation(groupInfo, groupAttributes);
 		keycloak.realm(realm).groups().group(group.getId()).update(newInfo);
 	}
-  
-  public void deleteGroup (String groupname){
-    
-    if (groupExists(groupname)){
-    	GroupRepresentation group = keycloak.realm(realm).getGroupByPath("/" + groupname);
-		  keycloak.realm(realm).groups().group(group.getId()).remove();
+
+	public void deleteGroup(String groupname) {
+
+		refreshTokenIfNeeded();
+
+		if (groupExists(groupname)) {
+			GroupRepresentation group = keycloak.realm(realm).getGroupByPath("/" + groupname);
+			keycloak.realm(realm).groups().group(group.getId()).remove();
 		}
-  }
-  
-  public List<String> listGroups (){
-		
-		List<String> groupnames = new ArrayList<String>();		
+	}
+
+	public List<String> listGroups() {
+
+		refreshTokenIfNeeded();
+
+		List<String> groupnames = new ArrayList<String>();
 		List<GroupRepresentation> groups = keycloak.realm(realm).groups().groups();
 		groups.forEach(group -> groupnames.add(group.getName()));
-		
+
 		return groupnames;
 	}
-	
-	public Boolean addUserToGroup (String username, String groupname){
-			
+
+	public Boolean addUserToGroup(String username, String groupname) {
+
+		refreshTokenIfNeeded();
+
 		GroupRepresentation group = new GroupRepresentation();
-    
-    if (groupExists(groupname)){
-    	group = keycloak.realm(realm).getGroupByPath("/" + groupname);
-		  keycloak.realm(realm).users().get(getUserId(username)).joinGroup(group.getId());
+
+		if (groupExists(groupname)) {
+			group = keycloak.realm(realm).getGroupByPath("/" + groupname);
+			keycloak.realm(realm).users().get(getUserId(username)).joinGroup(group.getId());
 		}
-   
-    return isUserInGroup(getUserId(username), group.getId());
+
+		return isUserInGroup(getUserId(username), group.getId());
 	}
- 
-  public Boolean removeUserFromGroup (String username, String groupname){
-			
+
+	public Boolean removeUserFromGroup(String username, String groupname) {
+
+		refreshTokenIfNeeded();
+
 		GroupRepresentation group = new GroupRepresentation();
-    
-    if (groupExists(groupname)){
-    	group = keycloak.realm(realm).getGroupByPath("/" + groupname);
-		  keycloak.realm(realm).users().get(getUserId(username)).leaveGroup(group.getId());
+
+		if (groupExists(groupname)) {
+			group = keycloak.realm(realm).getGroupByPath("/" + groupname);
+			keycloak.realm(realm).users().get(getUserId(username)).leaveGroup(group.getId());
 		}
-   
-    return !isUserInGroup(getUserId(username), group.getId());
+
+		return !isUserInGroup(getUserId(username), group.getId());
 	}
- 
-  private String getUserId (String username) {
-		
-		List<UserRepresentation> users = keycloak.realm(realm).users().search(username); // substring-based match, can return more than one user
-		
+
+	private String getUserId(String username) {
+
+		refreshTokenIfNeeded();
+
+
+		List<UserRepresentation> users = keycloak.realm(realm).users().search(username); // substring-based match, can
+																							// return more than one user
+
 		for (UserRepresentation user : users) {
-			if (user.getUsername().equals(username)) return user.getId();
+			if (user.getUsername().equals(username))
+				return user.getId();
 		}
-		
+
 		return null;
 	}
 
-  private UserRepresentation buildUserRepresentation (Map<String, String> userInfo, String[] userAttributes, boolean update){
-		
+	private UserRepresentation buildUserRepresentation(Map<String, String> userInfo, String[] userAttributes,
+			boolean update) {
+
 		UserRepresentation user = new UserRepresentation();
 		user.setUsername(userInfo.get("username"));
 		user.setFirstName(userInfo.get("first_name"));
 		user.setLastName(userInfo.get("last_name"));
 		user.setEmail(userInfo.get("email"));
-		
-    for (String attribute : userAttributes){
-		  user.singleAttribute(attribute, userInfo.getOrDefault(attribute, ""));
+
+		for (String attribute : userAttributes) {
+			user.singleAttribute(attribute, userInfo.getOrDefault(attribute, ""));
 		}
-   
+
 		user.setEnabled(true);
-		
-		//Add credentials only if it is a new user
-		if (!update){
+
+		// Add credentials only if it is a new user
+		if (!update) {
 			CredentialRepresentation credential = buildUserCredential(userInfo.get("password"), false);
-			List<CredentialRepresentation> credentials = Arrays.asList(credential);	
-			
+			List<CredentialRepresentation> credentials = Arrays.asList(credential);
+
 			user.setCredentials(credentials);
 		}
-		
+
 		return user;
 	}
-	
-	private CredentialRepresentation buildUserCredential (String password, boolean reset){
-		
+
+	private CredentialRepresentation buildUserCredential(String password, boolean reset) {
+
 		CredentialRepresentation credential = new CredentialRepresentation();
 		credential.setType(CredentialRepresentation.PASSWORD);
 		credential.setValue(password);
-		credential.setTemporary(!reset); //password is temporary only if being set for the first time
-		
+		credential.setTemporary(!reset); // password is temporary only if being set for the first time
+
 		return credential;
 	}
- 
-  private GroupRepresentation buildGroupRepresentation (Map<String, String> groupInfo, String[] groupAttributes) {
-		
+
+	private GroupRepresentation buildGroupRepresentation(Map<String, String> groupInfo, String[] groupAttributes) {
+
 		GroupRepresentation group = new GroupRepresentation();
 		group.setName(groupInfo.get("name"));
-		
-    for (String attribute : groupAttributes){
-      group.singleAttribute(attribute, groupInfo.getOrDefault(attribute, ""));
+
+		for (String attribute : groupAttributes) {
+			group.singleAttribute(attribute, groupInfo.getOrDefault(attribute, ""));
 		}
-		
+
 		return group;
 	}
-	
-	private boolean groupExists (String groupname){
-		
+
+	private boolean groupExists(String groupname) {
+
 		boolean exists = true;
-		
-		try{
+
+		try {
 			keycloak.realm(realm).getGroupByPath("/" + groupname);
-		}
-		catch (NotFoundException e){
+		} catch (NotFoundException e) {
 			exists = false;
 		}
-		
+
 		return exists;
 	}
- 
-  private boolean isUserInGroup (String userId, String groupId) {
-		
+
+	private boolean isUserInGroup(String userId, String groupId) {
+
 		List<GroupRepresentation> userGroups = keycloak.realm(realm).users().get(userId).groups();
-		
+
 		for (GroupRepresentation userGroup : userGroups) {
-			if (userGroup.getId().equals(groupId)) return true;
+			if (userGroup.getId().equals(groupId))
+				return true;
 		}
-		
+
 		return false;
 	}
- 
-  private Keycloak getKeycloakInstance (){
-    
-    String token = getAuthToken(clientId, clientSecret);
-		
-		return Keycloak.getInstance(serverUrl, realm, clientId, token);
-	}
-  
-  private String getAuthToken (String id, String secret) {
-		
-		String token = new String();
-		
-		try {			
-			//Set parameters
-			Map<String, String> params = new HashMap<String, String>();
-	    params.put("grant_type", "client_credentials");
-	    params.put("client_id", id);
-	    params.put("client_secret", secret);
 
-	    StringBuilder postData = new StringBuilder();
-	        
-	    for (Map.Entry<String, String> param : params.entrySet()) {
-        if (postData.length() != 0){
-	        postData.append('&');
-        }
-        postData.append(URLEncoder.encode(param.getKey(), StandardCharsets.UTF_8.toString()));
-	      postData.append('=');
-	      postData.append(URLEncoder.encode(param.getValue(), StandardCharsets.UTF_8.toString()));
-      }
-	        
-	    byte[] postDataBytes = postData.toString().getBytes(StandardCharsets.UTF_8);
-			
-	    //Call token endpoint
-	    URL url = new URL(serverUrl + tokenEndpoint);
-	    HttpURLConnection con = (HttpURLConnection) url.openConnection();
-			
+	// private Keycloak getKeycloakInstance() {
+
+	// 	String token = getAuthToken(clientId, clientSecret);
+
+	// 	return Keycloak.getInstance(serverUrl, realm, clientId, token);
+	// }
+
+	// private String getAuthToken(String id, String secret) {
+
+		String token = new String();
+
+		try {
+			// Set parameters
+			Map<String, String> params = new HashMap<String, String>();
+			params.put("grant_type", "client_credentials");
+			params.put("client_id", id);
+			params.put("client_secret", secret);
+
+			StringBuilder postData = new StringBuilder();
+
+			for (Map.Entry<String, String> param : params.entrySet()) {
+				if (postData.length() != 0) {
+					postData.append('&');
+				}
+				postData.append(URLEncoder.encode(param.getKey(), StandardCharsets.UTF_8.toString()));
+				postData.append('=');
+				postData.append(URLEncoder.encode(param.getValue(), StandardCharsets.UTF_8.toString()));
+			}
+
+			byte[] postDataBytes = postData.toString().getBytes(StandardCharsets.UTF_8);
+
+			// Call token endpoint
+			URL url = new URL(serverUrl + tokenEndpoint);
+			HttpURLConnection con = (HttpURLConnection) url.openConnection();
+
 			con.setRequestMethod("POST");
-			con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
+			con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 			con.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
-	    con.setDoOutput(true);
-	    con.getOutputStream().write(postDataBytes);
-			
-	    //Read the response
+			con.setDoOutput(true);
+			con.getOutputStream().write(postDataBytes);
+
+			// Read the response
 			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8));
 			StringBuffer content = new StringBuffer();
 			String inputLine;
-			
+
 			while ((inputLine = in.readLine()) != null) {
 				content.append(inputLine);
 			}
-			
+
 			in.close();
 			con.disconnect();
-			
-			//Get the token
-      ObjectMapper mapper = new ObjectMapper();
-      Map<String, String> response = mapper.readValue(content.toString(), new TypeReference<Map<String, String>>() {});
-      token = response.get("access_token");
-          	
+
+			// Get the token
+			ObjectMapper mapper = new ObjectMapper();
+			Map<String, String> response = mapper.readValue(content.toString(),
+					new TypeReference<Map<String, String>>() {
+					});
+			token = response.get("access_token");
+
 		} catch (MalformedURLException e) {
-			  e.printStackTrace();
+			e.printStackTrace();
 		} catch (IOException e) {
-			  e.printStackTrace();
+			e.printStackTrace();
 		}
-		
+
 		return token;
 	}
 
