@@ -72,7 +72,6 @@ public class KeycloakAdmin {
 		}
 	}
 
-	private String getAuthToken() {
 
 	public Response createUser(Map<String, String> userInfo, String[] defaultRoles, String[] userAttributes) {
 
