@@ -1,21 +1,12 @@
 
 package org.lareferencia.core.dashboard.security;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
@@ -30,29 +21,18 @@ import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 public class KeycloakAdmin {
 
 	private static final long TOKEN_EXPIRY_THRESHOLD = 60;
-	private String serverUrl;
 	private String realm;
-	private String tokenEndpoint;
-	private String clientId;
-	private String clientSecret;
-
+	
 	private final Keycloak keycloak;
 
 	private AccessTokenResponse tokenResponse;
 
 	public KeycloakAdmin(String serverUrl, String realm, String tokenEndpoint, String clientId, String clientSecret) {
 
-		this.serverUrl = serverUrl;
 		this.realm = realm;
-		this.tokenEndpoint = tokenEndpoint;
-		this.clientId = clientId;
-		this.clientSecret = clientSecret;
 
 		this.keycloak = KeycloakBuilder.builder()
 				.serverUrl(serverUrl)
