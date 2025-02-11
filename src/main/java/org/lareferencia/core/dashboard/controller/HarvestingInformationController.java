@@ -31,7 +31,6 @@ import org.lareferencia.core.dashboard.service.HarvesterInfoServiceException;
 import org.lareferencia.core.dashboard.service.IHarvestingInformationService;
 import org.lareferencia.core.dashboard.service.IHarvestingResult;
 import org.lareferencia.core.dashboard.service.IHarvestingSource;
-import org.lareferencia.core.dashboard.service.impl.v3.HarvestingInformationService;
 import org.lareferencia.core.util.date.DateHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
