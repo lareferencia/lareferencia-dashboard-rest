@@ -7,9 +7,11 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.keycloak.KeycloakSecurityContext;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 @Service
+@ConditionalOnProperty(name = "keycloak.enabled", havingValue = "true")
 public class KeycloakSecurityService implements ISecurityService {
 
 	@Value("${authz.admin-role}")
