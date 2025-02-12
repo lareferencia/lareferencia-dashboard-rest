@@ -5,8 +5,11 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 @Service
+@ConditionalOnProperty(name = "keycloak.enabled", havingValue = "false", matchIfMissing = true)
+
 public class DevelopmentSecurityService implements ISecurityService {
 
     // Se puede configurar el rol de administrador vía propiedades; si no se establece se usa ROLE_ADMIN.
