@@ -1,11 +1,8 @@
 
 package org.lareferencia.dashboard.app;
 
-import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.impl.HttpSolrClient;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -16,8 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.data.solr.core.SolrTemplate;
-import org.springframework.data.solr.repository.config.EnableSolrRepositories;
+
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
@@ -34,8 +30,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @SpringBootApplication
 @ComponentScan(  basePackages={ "org.lareferencia.core.dashboard", "org.lareferencia.app.dashboard" } )
 @EntityScan( basePackages= { "org.lareferencia.backend.domain", "org.lareferencia.core.oabroker" } )
-@EnableJpaRepositories( basePackages={ "org.lareferencia.backend.repositories.jpa", "org.lareferencia.core.oabroker" } )
-@EnableSolrRepositories( basePackages= { "org.lareferencia.backend.repositories.solr" } ) 
+@EnableJpaRepositories( basePackages={ "org.lareferencia.backend.repositories.jpa", "org.lareferencia.core.oabroker" } ) 
 @EnableAutoConfiguration( exclude = {
 	    org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class
 })
@@ -51,32 +46,6 @@ public class DashboardApplication {
 		SpringApplication.run(DashboardApplication.class, args);
 	}
 	
-	/** Configurations beans for solr services */
-	@Bean(name="solrClient")
-    public SolrClient solrClient(@Value("${default.solr.server}") String solrHost) {
-        return new HttpSolrClient.Builder(solrHost).build();
-    }
-	
-	@Bean(name="validationSolrClient")
-    public SolrClient validationSolrClient(@Value("${vstats.solr.server}") String solrHost) {
-        return new HttpSolrClient.Builder(solrHost).build();
-    }
-	
-	@Bean(name="solrTemplate")
-    public SolrTemplate solrTemplate(@Qualifier("solrClient") SolrClient client) throws Exception {
-        return new SolrTemplate(client);
-    }	
-
-    @Bean(name="validationSolrTemplate")
-    public SolrTemplate validationSolrTemplate(@Qualifier("validationSolrClient") SolrClient solrClient) throws Exception {
-        return new SolrTemplate(solrClient);
-    }	
-    
-    @Bean(name="validationSolrCoreName")
-    public String validationSolrCoreName(@Value("${vstats.solr.core}") String validationSolrCoreName) throws Exception {
-        return validationSolrCoreName;
-    }	
-    
     @Bean
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2)
@@ -109,6 +78,32 @@ public class DashboardApplication {
             }           
 
         };          
-    }    
+    }
+
+    /** Bean para el repositorio Parquet de estadísticas de validación */
+    @Bean
+    public org.lareferencia.backend.repositories.parquet.ValidationStatParquetRepository validationStatParquetRepository() {
+        return new org.lareferencia.backend.repositories.parquet.ValidationStatParquetRepository();
+    }
+
+    /** Bean para el motor de consultas Parquet */
+    @Bean
+    public org.lareferencia.backend.repositories.parquet.ValidationStatParquetQueryEngine validationStatParquetQueryEngine() {
+        return new org.lareferencia.backend.repositories.parquet.ValidationStatParquetQueryEngine();
+    }
+
+    /** Bean para el helper de fingerprint de registros */
+    @Bean
+    public org.lareferencia.core.util.IRecordFingerprintHelper fingerprintHelper() {
+        return new org.lareferencia.core.util.PrefixedRecordFingerprintHelper();
+    }
+
+    /** Bean para el servicio de estadísticas de validación Parquet */
+    @Bean(name = "validationStatisticsParquetService")
+    public org.lareferencia.backend.services.validation.IValidationStatisticsService validationStatisticsParquetService() {
+        // Crear una instancia del servicio Parquet
+        return new org.lareferencia.backend.services.parquet.ValidationStatisticsParquetService();
+    }
+
 
 }

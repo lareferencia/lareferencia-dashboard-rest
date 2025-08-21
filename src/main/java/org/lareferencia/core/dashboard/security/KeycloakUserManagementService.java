@@ -7,9 +7,11 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 @Service
+@ConditionalOnProperty(name = "keycloak.enabled", havingValue = "true", matchIfMissing = true)
 public class KeycloakUserManagementService implements IUserManagementService {
 
   @Value("${keycloak.auth-server-url}")
@@ -50,14 +52,14 @@ public class KeycloakUserManagementService implements IUserManagementService {
   @Override
 	public Boolean createUser(Map<String, String> infoMap) {
     
-    return admin.createUser(infoMap, defaultRoles, userAttributes).getStatusInfo().toString().equals("Created");
+    return admin.createUser(infoMap, defaultRoles, userAttributes).getStatus() == 201;
 	}
 
 	@Override
 	public Boolean deleteUser(String userId) {
 		
     
-    return admin.deleteUser(userId).getStatusInfo().toString().equals("No Content");
+    return admin.deleteUser(userId).getStatus() == 204;
 	}
 
 	@Override
@@ -101,7 +103,7 @@ public class KeycloakUserManagementService implements IUserManagementService {
 	public Boolean createGroup(Map<String, String> infoMap) {
 		
     
-		return admin.createGroup(infoMap, groupAttributes).getStatusInfo().toString().equals("Created");
+		return admin.createGroup(infoMap, groupAttributes).getStatus() == 201;
 	}
 
 	@Override

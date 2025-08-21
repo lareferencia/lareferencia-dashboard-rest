@@ -60,16 +60,27 @@ public class KeycloakAdmin {
 		UserRepresentation user = buildUserRepresentation(userInfo, userAttributes, false);
 		Response response = keycloak.realm(realm).users().create(user);
 
-		// Add default roles to user
-		List<RoleRepresentation> roles = new ArrayList<RoleRepresentation>();
-
-		for (String role : defaultRoles) {
-			roles.add(keycloak.realm(realm).roles().get(role).toRepresentation());
+		// Si la creación fue exitosa, agregar roles por defecto
+		if (response.getStatus() == 201) {
+			// Obtener el usuario recién creado por username
+			String username = userInfo.get("username");
+			if (username != null) {
+				try {
+					String userId = getUserId(username);
+					
+					// Add default roles to user
+					List<RoleRepresentation> roles = new ArrayList<RoleRepresentation>();
+					for (String role : defaultRoles) {
+						roles.add(keycloak.realm(realm).roles().get(role).toRepresentation());
+					}
+					
+					keycloak.realm(realm).users().get(userId).roles().realmLevel().add(roles);
+				} catch (Exception e) {
+					// Log error but don't fail the user creation
+					System.err.println("Error adding default roles to user: " + e.getMessage());
+				}
+			}
 		}
-
-		String responsePath = response.getLocation().toString();
-		String userId = responsePath.substring(responsePath.lastIndexOf('/') + 1);
-		keycloak.realm(realm).users().get(userId).roles().realmLevel().add(roles);
 
 		return response;
 	}
