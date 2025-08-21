@@ -193,6 +193,27 @@ public class HarvestingInformationService implements IHarvestingInformationServi
 
 		return network;
 	}
+
+	@Override
+	public String getRecordMetadataBySnapshotAndIdentifier(Long snapshotId, String identifier) throws HarvesterInfoServiceException {
+		// replace %2F by /
+		identifier = identifier.replace("%2F", "/");
+
+		//System.out.println("getRecordMetadataBySnapshotAndIdentifier: " + snapshotId + " - " + identifier);
+
+		OAIRecord record = metadataRecordService.findRecordByIdentifier(snapshotId, identifier);
+		if (record != null )
+			try {
+				return metadataRecordService.getPublishedMetadata(record).toString();
+			} catch (OAIRecordMetadataParseException | MetadataRecordStoreException e) {
+				throw new HarvesterInfoServiceException(
+						"Record w/ ID:" + record.getId() + " metadata exception: " + e.getMessage());
+			}
+		else
+			return "No record found - Probably the diagnose report is outdated";
+		
+
+	}
  
 
 }

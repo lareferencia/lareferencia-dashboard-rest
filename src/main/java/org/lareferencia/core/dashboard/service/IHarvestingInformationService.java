@@ -7,6 +7,10 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 public interface IHarvestingInformationService {
 	
@@ -28,7 +32,10 @@ public interface IHarvestingInformationService {
 
 	Page<IHarvestingResult> getHarvestingHistoryBySourceAcronym(String sourceAcronym , LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) throws HarvesterInfoServiceException;
  
-  String getRecordMetadataByRecordIDAndSourceAcronym(String sourceAcronym, Long recordID) throws HarvesterInfoServiceException;
+    String getRecordMetadataByRecordIDAndSourceAcronym(String sourceAcronym, Long recordID) throws HarvesterInfoServiceException;
 
+	String getRecordMetadataBySnapshotAndIdentifier(Long snapshotId, String identifier) throws HarvesterInfoServiceException;
+
+	
 
 }
