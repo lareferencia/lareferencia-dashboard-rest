@@ -196,11 +196,7 @@ public class HarvestingInformationService implements IHarvestingInformationServi
 
 	@Override
 	public String getRecordMetadataBySnapshotAndIdentifier(Long snapshotId, String identifier) throws HarvesterInfoServiceException {
-		// replace %2F by /
-		identifier = identifier.replace("%2F", "/");
-
-		//System.out.println("getRecordMetadataBySnapshotAndIdentifier: " + snapshotId + " - " + identifier);
-
+	
 		OAIRecord record = metadataRecordService.findRecordByIdentifier(snapshotId, identifier);
 		if (record != null )
 			try {

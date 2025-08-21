@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.lareferencia.backend.domain.validation.ValidationStatsQueryResult;
 import org.lareferencia.core.dashboard.security.ISecurityService;
 import org.lareferencia.core.dashboard.service.HarvesterInfoServiceException;
 import org.lareferencia.core.dashboard.service.IHarvestingInformationService;
@@ -35,6 +36,7 @@ import org.lareferencia.core.dashboard.service.impl.v3.HarvestingInformationServ
 import org.lareferencia.core.util.date.DateHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
@@ -43,15 +45,18 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 @RestController
 @Api(value = "Harvesting Information", tags = "Harvesting")
@@ -215,16 +220,19 @@ public class HarvestingInformationController {
 	@ApiOperation(value = "Returns the metadata for a record by snapshot id and identifier")
 	@ApiResponses(value = {
 	@ApiResponse(code = 200, message = "Returns the metadata for a record by snapshot id and identifier") })
-	@RequestMapping(value = "/{sourceAcronym}/record/{snapshotID}/{identifier}", method = RequestMethod.GET)
+	@RequestMapping(value = "/{sourceAcronym}/record", method = RequestMethod.GET)
 
 	HttpEntity<String> getRecordMetadataBySnapshotAndIdentifier(@PathVariable("sourceAcronym") String sourceAcronym,
-			@PathVariable("snapshotID") Long snapshotID, @PathVariable("identifier") String identifier) throws HarvesterInfoServiceException {
+			@ApiParam(value = "OAI Identifier", required = true) @RequestParam("identifier") String identifier,
+    		@ApiParam(value = "Harvesting ID", required = true, example = "1") @RequestParam("harvestingID") Long harvestingID
+    	) throws HarvesterInfoServiceException {
 
-		String result = hService.getRecordMetadataBySnapshotAndIdentifier(snapshotID, identifier);
+		String result = hService.getRecordMetadataBySnapshotAndIdentifier(harvestingID, identifier);
 
 		return new ResponseEntity<String>(result, HttpStatus.OK);
 
 	}
 
+	
 	
 }
