@@ -211,39 +211,20 @@ public class HarvestingInformationController {
 		return new ResponseEntity<IHarvestingResult>(result, HttpStatus.OK);
 	}
 
-	@ApiOperation(value = "Returns the metadata for a record by id and source acronym")
-	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "Returns the metadata for a record by id and source acronym") })
-	@RequestMapping(value = "/{sourceAcronym}/record/{recordID}", method = RequestMethod.GET)
-	HttpEntity<String> getRecordMetadataByID(@PathVariable("sourceAcronym") String sourceAcronym,
-			@PathVariable("recordID") Long recordID) throws HarvesterInfoServiceException {
 
-		String result = hService.getRecordMetadataByRecordIDAndSourceAcronym(sourceAcronym, recordID);
+	@ApiOperation(value = "Returns the metadata for a record by snapshot id and identifier")
+	@ApiResponses(value = {
+	@ApiResponse(code = 200, message = "Returns the metadata for a record by snapshot id and identifier") })
+	@RequestMapping(value = "/{sourceAcronym}/record/{snapshotID}/{identifier}", method = RequestMethod.GET)
+
+	HttpEntity<String> getRecordMetadataBySnapshotAndIdentifier(@PathVariable("sourceAcronym") String sourceAcronym,
+			@PathVariable("snapshotID") Long snapshotID, @PathVariable("identifier") String identifier) throws HarvesterInfoServiceException {
+
+		String result = hService.getRecordMetadataBySnapshotAndIdentifier(snapshotID, identifier);
 
 		return new ResponseEntity<String>(result, HttpStatus.OK);
 
 	}
 
-	// private Page<IHarvestingSource>
-	// filterByUserPermissions(Page<IHarvestingSource> list, Pageable pageable) {
-	//
-	// KeycloakAuthorization authz = new
-	// KeycloakAuthorization(getKeycloakSecurityContext());
-	// List<String> userGroups = authz.getGroups();
-	// List<IHarvestingSource> sources = list.getContent();
-	// List<IHarvestingSource> filtered = new ArrayList<IHarvestingSource>();
-	//
-	// if (authz.hasRole(adminRole)) {
-	// filtered = sources;
-	// } else {
-	// for (IHarvestingSource source : sources) {
-	// if (userGroups.contains(source.getAcronym())) {
-	// filtered.add(source);
-	// }
-	// }
-	// }
-	//
-	// return new PageImpl<IHarvestingSource>(filtered, pageable, filtered.size());
-	// }
-
+	
 }
