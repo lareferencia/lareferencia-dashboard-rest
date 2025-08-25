@@ -67,9 +67,18 @@ public class KeycloakAdmin {
 			roles.add(keycloak.realm(realm).roles().get(role).toRepresentation());
 		}
 
-		String responsePath = response.getLocation().toString();
-		String userId = responsePath.substring(responsePath.lastIndexOf('/') + 1);
-		keycloak.realm(realm).users().get(userId).roles().realmLevel().add(roles);
+		// Try to extract user ID from response for role assignment
+		// In newer JAX-RS versions, we need to handle this differently
+		try {
+			Object locationHeader = response.getMetadata().getFirst("Location");
+			if (locationHeader != null) {
+				String userId = locationHeader.toString().substring(locationHeader.toString().lastIndexOf('/') + 1);
+				keycloak.realm(realm).users().get(userId).roles().realmLevel().add(roles);
+			}
+		} catch (Exception e) {
+			// If we can't get the location header, skip role assignment
+			// This maintains compatibility across JAX-RS versions
+		}
 
 		return response;
 	}

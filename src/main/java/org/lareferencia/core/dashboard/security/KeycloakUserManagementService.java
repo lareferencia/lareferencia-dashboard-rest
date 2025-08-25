@@ -50,14 +50,14 @@ public class KeycloakUserManagementService implements IUserManagementService {
   @Override
 	public Boolean createUser(Map<String, String> infoMap) {
     
-    return admin.createUser(infoMap, defaultRoles, userAttributes).getStatusInfo().toString().equals("Created");
+    return admin.createUser(infoMap, defaultRoles, userAttributes).getStatus() == 201; // HTTP 201 Created
 	}
 
 	@Override
 	public Boolean deleteUser(String userId) {
 		
     
-    return admin.deleteUser(userId).getStatusInfo().toString().equals("No Content");
+    return admin.deleteUser(userId).getStatus() == 204; // HTTP 204 No Content
 	}
 
 	@Override
@@ -101,7 +101,7 @@ public class KeycloakUserManagementService implements IUserManagementService {
 	public Boolean createGroup(Map<String, String> infoMap) {
 		
     
-		return admin.createGroup(infoMap, groupAttributes).getStatusInfo().toString().equals("Created");
+		return admin.createGroup(infoMap, groupAttributes).getStatus() == 201; // HTTP 201 Created
 	}
 
 	@Override

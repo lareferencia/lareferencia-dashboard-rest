@@ -14,7 +14,6 @@ import org.lareferencia.backend.domain.NetworkSnapshot;
 import org.lareferencia.backend.domain.ValidationStatObservation;
 import org.lareferencia.backend.domain.ValidatorRule;
 import org.lareferencia.backend.repositories.jpa.NetworkSnapshotRepository;
-import org.lareferencia.backend.repositories.solr.ValidationStatRepository;
 import org.lareferencia.core.dashboard.service.IRecordValidationResult;
 import org.lareferencia.core.dashboard.service.IValidationInformationService;
 import org.lareferencia.core.dashboard.service.ValueCount;
@@ -76,8 +75,9 @@ public class ValidationResultService implements IValidationInformationService {
 	public static final String VALID_RULE_SUFFIX = "_rule_valid_occrs";
 
 	
-	@Autowired
-	ValidationStatRepository validationStatRepository;
+	// TODO: Replace with Parquet-based repository during dashboard modernization
+	// @Autowired
+	// ValidationStatRepository validationStatRepository;
 	
 	/**
 	 * Obtains validation results by snapshot ID
