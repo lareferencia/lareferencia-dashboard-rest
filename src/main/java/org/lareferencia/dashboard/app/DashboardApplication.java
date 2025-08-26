@@ -86,12 +86,6 @@ public class DashboardApplication {
         return new org.lareferencia.backend.repositories.parquet.ValidationStatParquetRepository();
     }
 
-    /** Bean para el motor de consultas Parquet */
-    @Bean
-    public org.lareferencia.backend.repositories.parquet.ValidationStatParquetQueryEngine validationStatParquetQueryEngine() {
-        return new org.lareferencia.backend.repositories.parquet.ValidationStatParquetQueryEngine();
-    }
-
     /** Bean para el helper de fingerprint de registros */
     @Bean
     public org.lareferencia.core.util.IRecordFingerprintHelper fingerprintHelper() {
