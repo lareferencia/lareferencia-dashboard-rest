@@ -12,11 +12,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lareferencia.backend.domain.NetworkSnapshot;
 import org.lareferencia.backend.domain.ValidatorRule;
-import org.lareferencia.backend.domain.validation.ValidationStatsQueryResult;
 import org.lareferencia.backend.domain.parquet.ValidationStatObservationParquet;
 import org.lareferencia.backend.repositories.jpa.NetworkSnapshotRepository;
-import org.lareferencia.backend.services.validation.ValidationStatisticsException;
-import org.lareferencia.backend.services.validation.IValidationStatisticsService;
+import org.lareferencia.backend.validation.IValidationStatisticsService;
+import org.lareferencia.backend.validation.ValidationStatisticsException;
+import org.lareferencia.backend.validation.ValidationStatsObservationsResult;
+import org.lareferencia.backend.validation.ValidationStatsResult;
 import org.lareferencia.core.dashboard.service.IRecordValidationResult;
 import org.lareferencia.core.dashboard.service.IValidationInformationService;
 import org.lareferencia.core.dashboard.service.ValueCount;
@@ -51,71 +52,13 @@ public class ValidationResultService implements IValidationInformationService {
 	 * @return
 	 * @throws ValidationInformationServiceException
 	 */
-	public ValidationResult validationResultByHarvestingID(String networkAcronym, Long snapshotID) throws ValidationInformationServiceException {
+	public ValidationStatsResult validationResultByHarvestingID(String networkAcronym, Long snapshotID) throws ValidationInformationServiceException {
 		
 		NetworkSnapshot snapshot = obtainNetworkSnapshotAndCheckAcronymCorrespondece(networkAcronym, snapshotID);
 		
 		try {
-			
-			// Consultar estadísticas agregadas de validación usando la nueva API
-			ValidationStatsQueryResult queryResult = validationService.queryValidatorRulesStatsBySnapshot(snapshotID, new ArrayList<>());
-			
-			ValidationResult result = new ValidationResult();
-			
-			// Obtener métricas básicas desde las agregaciones (formato parquet)
-			Map<String, Object> aggregations = queryResult.getAggregations();
-			if (aggregations != null) {
-				result.setSize(getIntegerFromMetadata(aggregations, "size"));
-				result.validSize = getIntegerFromMetadata(aggregations, "validSize");
-				result.transformedSize = getIntegerFromMetadata(aggregations, "transformedSize");
-			}
-			
-			// Procesar las reglas del validador
-			if (snapshot.getNetwork() == null || snapshot.getNetwork().getValidator() == null) {
-				throw new ValidationInformationServiceException("Validator of Snapshot w/ ID:" + snapshotID + " do not exist");
-			}
-			
-			// Obtener conteos de reglas desde las agregaciones - formato parquet
-			Map<String, Integer> validRuleMap = new HashMap<>();
-			Map<String, Integer> invalidRuleMap = new HashMap<>();
-			
-			// El servicio Parquet devuelve los datos en "rulesByID"
-			if (aggregations != null && aggregations.containsKey("rulesByID")) {
-				@SuppressWarnings("unchecked")
-				Map<String, Map<String, Object>> rulesByID = (Map<String, Map<String, Object>>) aggregations.get("rulesByID");
-				
-				for (Map.Entry<String, Map<String, Object>> ruleEntry : rulesByID.entrySet()) {
-					String ruleId = ruleEntry.getKey();
-					Map<String, Object> ruleData = ruleEntry.getValue();
-					
-					Object validCount = ruleData.get("validCount");
-					Object invalidCount = ruleData.get("invalidCount");
-					
-					if (validCount instanceof Number) {
-						validRuleMap.put(ruleId, ((Number) validCount).intValue());
-					}
-					if (invalidCount instanceof Number) {
-						invalidRuleMap.put(ruleId, ((Number) invalidCount).intValue());
-					}
-				}
-			}
-			
-			for (ValidatorRule rule : snapshot.getNetwork().getValidator().getRules()) {
-				String ruleID = rule.getId().toString();
-
-				ValidationRule ruleResult = new ValidationRule();
-				ruleResult.ruleID = rule.getId();
-				ruleResult.validCount = Optional.ofNullable(validRuleMap.get(ruleID)).orElse(0);
-				ruleResult.invalidCount = Optional.ofNullable(invalidRuleMap.get(ruleID)).orElse(0);
-				ruleResult.name = rule.getName();
-				ruleResult.description = rule.getDescription();
-				ruleResult.mandatory = rule.getMandatory();
-				ruleResult.quantifier = rule.getQuantifier().toString();
-
-				result.rulesByID.put(ruleID, ruleResult);
-			}
-
-			return result;
+						
+			return validationService.queryValidatorRulesStatsBySnapshot(snapshot, new ArrayList<>());
 			
 		} catch (ValidationStatisticsException e) {
 			logger.error("Error querying validation statistics: " + e.getMessage(), e);
@@ -143,7 +86,7 @@ public class ValidationResultService implements IValidationInformationService {
 			List<String> filters = buildFilters(isValid, isTransformed, validRuleIds, invalidRuleIds, oaiIdentifier);
 			
 			// Consultar observaciones paginadas
-			ValidationStatsQueryResult queryResult = validationService.queryValidationStatsObservationsBySnapshotID(
+			ValidationStatsObservationsResult queryResult = validationService.queryValidationStatsObservationsBySnapshotID(
 				snapshotID, filters, pageable);
 			
 			// Convertir resultados a IRecordValidationResult
@@ -185,7 +128,7 @@ public class ValidationResultService implements IValidationInformationService {
 			List<String> filters = new ArrayList<>();
 			
 			// Consultar observaciones para obtener ocurrencias
-			ValidationStatsQueryResult queryResult = validationService.queryValidationStatsObservationsBySnapshotID(
+			ValidationStatsObservationsResult queryResult = validationService.queryValidationStatsObservationsBySnapshotID(
 				snapshotID, filters, org.springframework.data.domain.PageRequest.of(0, 10000));
 			
 			// Procesar observaciones para extraer conteos de ocurrencias

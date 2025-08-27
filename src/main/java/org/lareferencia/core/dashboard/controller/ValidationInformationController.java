@@ -29,8 +29,9 @@
 package org.lareferencia.core.dashboard.controller;
 
 import org.lareferencia.core.dashboard.service.IRecordValidationResult;
-import org.lareferencia.backend.services.validation.IValidationStatisticsService;
-import org.lareferencia.backend.domain.validation.ValidationStatsQueryResult;
+import org.lareferencia.backend.validation.IValidationStatisticsService;
+import org.lareferencia.backend.validation.ValidationStatsObservationsResult;
+import org.lareferencia.backend.validation.ValidationStatsResult;
 
 import java.util.List;
 import java.util.Optional;
@@ -74,19 +75,19 @@ public class ValidationInformationController {
 	@ApiOperation(value = "Returns validation results info by harvesting id")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Returns validation results info by harvesting id") })  
     @RequestMapping(value = "/{sourceAcronym}/{harvestingID}", method = RequestMethod.GET)
-    HttpEntity<IValidationResult> getValidationResults(
+    HttpEntity<ValidationStatsResult> getValidationResults(
     		@ApiParam(value = "Source acronym", required = true) @PathVariable("sourceAcronym") String sourceAcronym, 
     		@ApiParam(value = "Harvesting ID", required = true, example = "1") @PathVariable("harvestingID") Long harvestingID) {
 
-		IValidationResult result = null;
+		ValidationStatsResult result = null;
 		
 		try {
 		
 			result = vService.validationResultByHarvestingID(sourceAcronym, harvestingID);
-	        return new ResponseEntity<IValidationResult>(result, HttpStatus.OK);
+	        return new ResponseEntity<ValidationStatsResult>(result, HttpStatus.OK);
 
 		} catch (Exception e) {
-	        return new ResponseEntity<IValidationResult>(result, HttpStatus.NOT_FOUND);
+	        return new ResponseEntity<ValidationStatsResult>(result, HttpStatus.NOT_FOUND);
 		}
     	
     }
@@ -94,7 +95,7 @@ public class ValidationInformationController {
 	@ApiOperation(value = "Query validation statistics using core-lib API (direct access)")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Returns validation statistics query result") })  
     @RequestMapping(value = "/stats/{networkAcronym}/{harvestingID}/query", method = RequestMethod.GET)
-    HttpEntity<ValidationStatsQueryResult> queryValidationStats(
+    HttpEntity<ValidationStatsObservationsResult> queryValidationStats(
     		@ApiParam(value = "Network acronym", required = true) @PathVariable("networkAcronym") String networkAcronym, 
     		@ApiParam(value = "Harvesting ID", required = true, example = "1") @PathVariable("harvestingID") Long harvestingID,
     		@ApiParam(value = "Query filters") @RequestParam(value = "filters", required = false) List<String> filters,
@@ -107,7 +108,7 @@ public class ValidationInformationController {
 			List<String> queryFilters = filters != null ? filters : new ArrayList<>();
 			
 			// Consultar observaciones usando la nueva API
-			ValidationStatsQueryResult result = validationService.queryValidationStatsObservationsBySnapshotID(
+			ValidationStatsObservationsResult result = validationService.queryValidationStatsObservationsBySnapshotID(
 				harvestingID, queryFilters, PageRequest.of(page, size));
 				
 			return new ResponseEntity<>(result, HttpStatus.OK);

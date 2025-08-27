@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lareferencia.backend.domain.validation.ValidationStatsQueryResult;
+import org.lareferencia.backend.validation.ValidationStatsObservationsResult;
 import org.lareferencia.core.dashboard.security.ISecurityService;
 import org.lareferencia.core.dashboard.service.HarvesterInfoServiceException;
 import org.lareferencia.core.dashboard.service.IHarvestingInformationService;

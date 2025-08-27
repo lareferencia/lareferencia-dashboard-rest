@@ -94,9 +94,9 @@ public class DashboardApplication {
 
     /** Bean para el servicio de estadísticas de validación Parquet */
     @Bean(name = "validationStatisticsParquetService")
-    public org.lareferencia.backend.services.validation.IValidationStatisticsService validationStatisticsParquetService() {
+    public org.lareferencia.backend.validation.IValidationStatisticsService validationStatisticsParquetService() {
         // Crear una instancia del servicio Parquet
-        return new org.lareferencia.backend.services.parquet.ValidationStatisticsParquetService();
+        return new org.lareferencia.backend.validation.ValidationStatisticsParquetService();
     }
 
 
