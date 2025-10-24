@@ -16,7 +16,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-// REMOVED: WebMvcConfigurerAdapter was deprecated in Spring 5.0 and removed in Spring 6.0
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import io.swagger.annotations.Api;
 import springfox.documentation.builders.ApiInfoBuilder;
@@ -66,17 +66,17 @@ public class DashboardApplication {
                 .build();
     }
     
-    /**
-     * CORS configuration - Updated for Spring 6.0
-     * Using WebMvcConfigurer interface directly instead of deprecated WebMvcConfigurerAdapter
-     */
+    @SuppressWarnings("deprecation")
     @Bean
     public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
+        return new WebMvcConfigurerAdapter() {
+        	
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**").allowedOrigins("*");
+
             }           
+
         };          
     }
 

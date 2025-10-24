@@ -3,7 +3,7 @@ package org.lareferencia.core.dashboard.security;
 
 import java.util.List;
 
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
 
 public interface ISecurityService {
 	

@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.core.Response;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.core.Response;
 
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
