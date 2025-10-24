@@ -48,18 +48,19 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springdoc.core.annotations.ParameterObject;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
 @RestController
-@Api(value = "Harvesting Information", tags = "Harvesting")
+@Tag(name = "Harvesting", description = "Harvesting Information")
 @RequestMapping("/api/v2/harvesting/source/")
 @CrossOrigin
 public class HarvestingInformationController {
@@ -78,11 +79,11 @@ public class HarvestingInformationController {
 	@Autowired
 	DateHelper dateHelper;
 
-	@ApiOperation(value = "Returns a list harvesting data sources with paging/sorting using {pageable}")
+	@Operation(summary = "Returns a list harvesting data sources with paging/sorting using {pageable}")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "Returns a list harvesting data sources with paging/sorting using {pageable}") })
+			@ApiResponse(responseCode = "200", description = "Returns a list harvesting data sources with paging/sorting using {pageable}") })
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
-	HttpEntity<Page<IHarvestingSource>> getSources(Pageable pageable) throws HarvesterInfoServiceException {
+	HttpEntity<Page<IHarvestingSource>> getSources(@ParameterObject Pageable pageable) throws HarvesterInfoServiceException {
 
 		Page<IHarvestingSource> result = null;
 
@@ -97,7 +98,7 @@ public class HarvestingInformationController {
 		return new ResponseEntity<Page<IHarvestingSource>>(result, HttpStatus.OK);
 	}
 
-	// @ApiOperation(value = "Returns a harvesting source info by source id")
+	// @Operation(summary = "Returns a harvesting source info by source id")
 	// @ApiResponses(value = { @ApiResponse(code = 200, message = "Returns a
 	// harvesting source info by source id") })
 	// @RequestMapping(value = "/by_id/{sourceID}", method = RequestMethod.GET)
@@ -110,8 +111,8 @@ public class HarvestingInformationController {
 	// return new ResponseEntity<IHarvestingSource>(result, HttpStatus.OK);
 	// }
 
-	@ApiOperation(value = "Returns a harvesting source info by source acronym")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Returns a harvesting source info by source acronym") })
+	@Operation(summary = "Returns a harvesting source info by source acronym")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Returns a harvesting source info by source acronym") })
 	@RequestMapping(value = "/{sourceAcronym}", method = RequestMethod.GET)
 	HttpEntity<IHarvestingSource> getSourceByAcronym(@PathVariable("sourceAcronym") String sourceAcronym)
 			throws HarvesterInfoServiceException {
@@ -138,12 +139,12 @@ public class HarvestingInformationController {
 	// return new ResponseEntity<Page<IHarvestingResult>>(result, HttpStatus.OK);
 	// }
 
-	@ApiOperation(value = "Returns a harvesting source harvesting history by source acronym")
+	@Operation(summary = "Returns a harvesting source harvesting history by source acronym")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "Returns a harvesting source harvesting info by source acronym") })
+			@ApiResponse(responseCode = "200", description = "Returns a harvesting source harvesting info by source acronym") })
 	@RequestMapping(value = "/{sourceAcronym}/history", method = RequestMethod.GET)
 	HttpEntity<Page<IHarvestingResult>> getHarvestingHistoryByAcronym(
-			@PathVariable("sourceAcronym") String sourceAcronym, Pageable pageable)
+			@PathVariable("sourceAcronym") String sourceAcronym, @ParameterObject Pageable pageable)
 			throws HarvesterInfoServiceException {
 
 		try {
@@ -151,22 +152,22 @@ public class HarvestingInformationController {
 			return new ResponseEntity<Page<IHarvestingResult>>(result, HttpStatus.OK);
 
 		} catch (HarvesterInfoServiceException e) {
-			logger.error("getHarvestingHistoryByAcronym: " + e.getMessage());
+			logger.error("getHarvestingHistoryByAcronym: " + e.getMessage(), e);
 			return new ResponseEntity<Page<IHarvestingResult>>(HttpStatus.NOT_FOUND);
 		} catch (Exception e) {
-			logger.error("getHarvestingHistoryByAcronym: " + e.getMessage());
+			logger.error("getHarvestingHistoryByAcronym: " + e.getMessage(), e);
 			return new ResponseEntity<Page<IHarvestingResult>>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
 	}
 
-	@ApiOperation(value = "Returns a harvesting source harvesting history within a time interval by source acronym")
+	@Operation(summary = "Returns a harvesting source harvesting history within a time interval by source acronym")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "Returns a harvesting source harvesting info for a given time interval by source acronym") })
+			@ApiResponse(responseCode = "200", description = "Returns a harvesting source harvesting info for a given time interval by source acronym") })
 	@RequestMapping(value = "/{sourceAcronym}/history/{startDate}/{endDate}", method = RequestMethod.GET)
 	HttpEntity<Page<IHarvestingResult>> getHarvestingHistoryByAcronymAndDate(
 			@PathVariable("sourceAcronym") String sourceAcronym, @PathVariable("startDate") String fromDate,
-			@PathVariable("endDate") String toDate, Pageable pageable)
+			@PathVariable("endDate") String toDate, @ParameterObject Pageable pageable)
 	{
 
 		// converts from dates to localdatetime at the start and end of the given dates
@@ -204,9 +205,9 @@ public class HarvestingInformationController {
 	// return new ResponseEntity<IHarvestingResult>(result, HttpStatus.OK);
 	// }
 
-	@ApiOperation(value = "Returns a harvesting source last good known harvesting by source acronym")
+	@Operation(summary = "Returns a harvesting source last good known harvesting by source acronym")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "Returns a harvesting source last good known harvesting by source acronym") })
+			@ApiResponse(responseCode = "200", description = "Returns a harvesting source last good known harvesting by source acronym") })
 	@RequestMapping(value = "/{sourceAcronym}/lkg", method = RequestMethod.GET)
 	HttpEntity<IHarvestingResult> getLGKSnapshotBySourceAcronym(@PathVariable("sourceAcronym") String sourceAcronym)
 			throws HarvesterInfoServiceException {
@@ -217,14 +218,14 @@ public class HarvestingInformationController {
 	}
 
 
-	@ApiOperation(value = "Returns the metadata for a record by snapshot id and identifier")
+	@Operation(summary = "Returns the metadata for a record by snapshot id and identifier")
 	@ApiResponses(value = {
-	@ApiResponse(code = 200, message = "Returns the metadata for a record by snapshot id and identifier") })
+	@ApiResponse(responseCode = "200", description = "Returns the metadata for a record by snapshot id and identifier") })
 	@RequestMapping(value = "/{sourceAcronym}/record", method = RequestMethod.GET)
 
 	HttpEntity<String> getRecordMetadataBySnapshotAndIdentifier(@PathVariable("sourceAcronym") String sourceAcronym,
-			@ApiParam(value = "OAI Identifier", required = true) @RequestParam("identifier") String identifier,
-    		@ApiParam(value = "Harvesting ID", required = true, example = "1") @RequestParam("harvestingID") Long harvestingID
+			@Parameter(description = "OAI Identifier", required = true) @RequestParam("identifier") String identifier,
+    		@Parameter(description = "Harvesting ID", required = true, example = "1") @RequestParam("harvestingID") Long harvestingID
     	) throws HarvesterInfoServiceException {
 
 		String result = hService.getRecordMetadataBySnapshotAndIdentifier(harvestingID, identifier);

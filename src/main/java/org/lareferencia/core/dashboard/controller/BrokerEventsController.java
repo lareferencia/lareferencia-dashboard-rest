@@ -39,13 +39,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @RestController
-@Api(value = "OpenAIRE Broker Events", tags = "OpenAIRE Broker")
+@Tag(name = "OpenAIRE Broker", description = "OpenAIRE Broker Events")
 @RequestMapping("/api/v2/oabroker/source/")
 @CrossOrigin
 public class BrokerEventsController {
@@ -55,8 +55,8 @@ public class BrokerEventsController {
 	BrokerEventsService brokerService;
 	
 
-	@ApiOperation(value = "Returns broker events by source")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Returns validation results on each record by harvesting id") })  
+	@Operation(summary = "Returns broker events by source")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Returns validation results on each record by harvesting id") })  
     @RequestMapping(value = "/{sourceAcronym}", method = RequestMethod.GET)
     HttpEntity< Page<BrokerEvent> > getBrokerEventsBySource(@PathVariable("sourceAcronym") String sourceAcronym, 
 															    		@RequestParam(value = "oai_identifier", required = false) Optional<String> oaiIdentifier,

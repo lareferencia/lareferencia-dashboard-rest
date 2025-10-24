@@ -2,13 +2,13 @@
 /*******************************************************************************
  * Copyright (c) 2013, 2020 LA Referencia / Red CLARA and others
  *
- * This	@ApiOperation(value = "Returns invalid metadata occurrences/count for a given validation rule by {harvestingID} and {ruleID}")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Returns invalid metadata occurrences/count for a given validation rule by {harvestingID} and {ruleID}") })  
+ * This	@Operation(summary = "Returns invalid metadata occurrences/count for a given validation rule by {harvestingID} and {ruleID}")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Returns invalid metadata occurrences/count for a given validation rule by {harvestingID} and {ruleID}") })  
     @RequestMapping(value = "/{sourceAcronym}/{harvestingID}/invalid_occrs/{ruleID}", method = RequestMethod.GET)
     HttpEntity< List<ValueCount> > invalidOccurrenceCountByHarvestingIDAndRuleID(
-    		@ApiParam(value = "Source acronym", required = true) @PathVariable("sourceAcronym") String sourceAcronym, 
-    		@ApiParam(value = "Harvesting ID", required = true, example = "1") @PathVariable("harvestingID") Long harvestingID, 
-    		@ApiParam(value = "Rule ID", required = true, example = "1") @PathVariable("ruleID") Long ruleID) {e is part of LRHarvester v4.x software
+    		@Parameter(description = "Source acronym", required = true) @PathVariable("sourceAcronym") String sourceAcronym, 
+    		@Parameter(description = "Harvesting ID", required = true, example = "1") @PathVariable("harvestingID") Long harvestingID, 
+    		@Parameter(description = "Rule ID", required = true, example = "1") @PathVariable("ruleID") Long ruleID) {e is part of LRHarvester v4.x software
  *
  *  This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
@@ -53,14 +53,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @RestController
-@Api(value = "Validation Information", tags="Validation")
+@Tag(name = "Validation", description = "Validation Information")
 @RequestMapping("/api/v2/validation/source")
 @CrossOrigin
 public class ValidationInformationController {
@@ -72,12 +72,12 @@ public class ValidationInformationController {
 	IValidationStatisticsService validationService;
 
 	
-	@ApiOperation(value = "Returns validation results info by harvesting id")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Returns validation results info by harvesting id") })  
+	@Operation(summary = "Returns validation results info by harvesting id")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Returns validation results info by harvesting id") })  
     @RequestMapping(value = "/{sourceAcronym}/{harvestingID}", method = RequestMethod.GET)
     HttpEntity<ValidationStatsResult> getValidationResults(
-    		@ApiParam(value = "Source acronym", required = true) @PathVariable("sourceAcronym") String sourceAcronym, 
-    		@ApiParam(value = "Harvesting ID", required = true, example = "1") @PathVariable("harvestingID") Long harvestingID) {
+    		@Parameter(description = "Source acronym", required = true) @PathVariable("sourceAcronym") String sourceAcronym, 
+    		@Parameter(description = "Harvesting ID", required = true, example = "1") @PathVariable("harvestingID") Long harvestingID) {
 
 		ValidationStatsResult result = null;
 		
@@ -92,15 +92,15 @@ public class ValidationInformationController {
     	
     }
 
-	@ApiOperation(value = "Query validation statistics using core-lib API (direct access)")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Returns validation statistics query result") })  
+	@Operation(summary = "Query validation statistics using core-lib API (direct access)")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Returns validation statistics query result") })  
     @RequestMapping(value = "/stats/{networkAcronym}/{harvestingID}/query", method = RequestMethod.GET)
     HttpEntity<ValidationStatsObservationsResult> queryValidationStats(
-    		@ApiParam(value = "Network acronym", required = true) @PathVariable("networkAcronym") String networkAcronym, 
-    		@ApiParam(value = "Harvesting ID", required = true, example = "1") @PathVariable("harvestingID") Long harvestingID,
-    		@ApiParam(value = "Query filters") @RequestParam(value = "filters", required = false) List<String> filters,
-    		@ApiParam(value = "Page number", example = "0") @RequestParam(value = "pageNumber", required = false, defaultValue = "0") Integer page,
-    		@ApiParam(value = "Page size", example = "20") @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer size) {
+    		@Parameter(description = "Network acronym", required = true) @PathVariable("networkAcronym") String networkAcronym, 
+    		@Parameter(description = "Harvesting ID", required = true, example = "1") @PathVariable("harvestingID") Long harvestingID,
+    		@Parameter(description = "Query filters") @RequestParam(value = "filters", required = false) List<String> filters,
+    		@Parameter(description = "Page number", example = "0") @RequestParam(value = "pageNumber", required = false, defaultValue = "0") Integer page,
+    		@Parameter(description = "Page size", example = "20") @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer size) {
 
 		try {
 			
@@ -118,19 +118,19 @@ public class ValidationInformationController {
 		}
 	}
     
-	@ApiOperation(value = "Returns validation results on each record by harvesting id")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Returns validation results on each record by harvesting id") })  
+	@Operation(summary = "Returns validation results on each record by harvesting id")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Returns validation results on each record by harvesting id") })  
     @RequestMapping(value = "/{sourceAcronym}/{harvestingID}/records", method = RequestMethod.GET)
     HttpEntity< Page<IRecordValidationResult> > getRecordValitationResult(
-    		@ApiParam(value = "Source acronym", required = true) @PathVariable("sourceAcronym") String sourceAcronym, 
-    		@ApiParam(value = "Harvesting ID", required = true, example = "1") @PathVariable("harvestingID") Long harvestingID, 
-    		@ApiParam(value = "Filter by validity status", required = false) @RequestParam(value = "is_valid", required = false) Boolean isValid, 
-    		@ApiParam(value = "Filter by transformation status", required = false) @RequestParam(value = "is_transformed", required = false) Boolean isTransformed, 
-    		@ApiParam(value = "Filter by valid rules IDs", required = false) @RequestParam(value = "valid_rules", required = false) List<String> validRules, 
-     		@ApiParam(value = "Filter by invalid rules IDs", required = false) @RequestParam(value = "invalid_rules", required = false) List<String> invalidRules, 
-    		@ApiParam(value = "Filter by OAI identifier", required = false) @RequestParam(value = "oai_identifier", required = false) String oaiIdentifier,
-    		@ApiParam(value = "Page number (0-based)", required = false) @RequestParam(value = "pageNumber", required = false, defaultValue = "0") Integer page,
-    		@ApiParam(value = "Page size", required = false) @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer size
+    		@Parameter(description = "Source acronym", required = true) @PathVariable("sourceAcronym") String sourceAcronym, 
+    		@Parameter(description = "Harvesting ID", required = true, example = "1") @PathVariable("harvestingID") Long harvestingID, 
+    		@Parameter(description = "Filter by validity status", required = false) @RequestParam(value = "is_valid", required = false) Boolean isValid, 
+    		@Parameter(description = "Filter by transformation status", required = false) @RequestParam(value = "is_transformed", required = false) Boolean isTransformed, 
+    		@Parameter(description = "Filter by valid rules IDs", required = false) @RequestParam(value = "valid_rules", required = false) List<String> validRules, 
+     		@Parameter(description = "Filter by invalid rules IDs", required = false) @RequestParam(value = "invalid_rules", required = false) List<String> invalidRules, 
+    		@Parameter(description = "Filter by OAI identifier", required = false) @RequestParam(value = "oai_identifier", required = false) String oaiIdentifier,
+    		@Parameter(description = "Page number (0-based)", required = false) @RequestParam(value = "pageNumber", required = false, defaultValue = "0") Integer page,
+    		@Parameter(description = "Page size", required = false) @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer size
 
     		) {
 		
@@ -150,13 +150,13 @@ public class ValidationInformationController {
 		}
     }
     
-	@ApiOperation(value = "Returns valid metadata occurrences/count for a given validation rule by {harvestingID} and {ruleID}")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Returns valid metadata occurrences/count for a given validation rule by {harvestingID} and {ruleID}") })  
+	@Operation(summary = "Returns valid metadata occurrences/count for a given validation rule by {harvestingID} and {ruleID}")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Returns valid metadata occurrences/count for a given validation rule by {harvestingID} and {ruleID}") })  
     @RequestMapping(value = "/{sourceAcronym}/{harvestingID}/valid_occrs/{ruleID}", method = RequestMethod.GET)
     HttpEntity< List<ValueCount> > validOccurrenceCountByHarvestingIDAndRuleID(
-    		@ApiParam(value = "Source acronym", required = true) @PathVariable("sourceAcronym") String sourceAcronym, 
-    		@ApiParam(value = "Harvesting ID", required = true, example = "1") @PathVariable("harvestingID") Long harvestingID, 
-    		@ApiParam(value = "Rule ID", required = true, example = "1") @PathVariable("ruleID") Long ruleID) {
+    		@Parameter(description = "Source acronym", required = true) @PathVariable("sourceAcronym") String sourceAcronym, 
+    		@Parameter(description = "Harvesting ID", required = true, example = "1") @PathVariable("harvestingID") Long harvestingID, 
+    		@Parameter(description = "Rule ID", required = true, example = "1") @PathVariable("ruleID") Long ruleID) {
 
 		List<ValueCount> result = null;
 				
@@ -170,8 +170,8 @@ public class ValidationInformationController {
 	}
     
 	
-	@ApiOperation(value = "Returns invalid metadata occurrences/count for a given validation rule by {harvestingID} and {ruleID}")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Returns invalid metadata occurrences/count for a given validation rule by {harvestingID} and {ruleID}") })  
+	@Operation(summary = "Returns invalid metadata occurrences/count for a given validation rule by {harvestingID} and {ruleID}")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Returns invalid metadata occurrences/count for a given validation rule by {harvestingID} and {ruleID}") })  
     @RequestMapping(value = "/{sourceAcronym}/{harvestingID}/invalid_occrs/{ruleID}", method = RequestMethod.GET)
     HttpEntity< List<ValueCount> > invalidOccurrenceCountByHarvestingIDAndRuleID(@PathVariable("sourceAcronym") String sourceAcronym, @PathVariable("harvestingID")  Long harvestingID, @PathVariable("ruleID")  Long ruleID) throws ValidationInformationServiceException {
 

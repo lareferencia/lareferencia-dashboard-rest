@@ -21,16 +21,16 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
-@Api(value = "User Management", tags = "Security")
+@Tag(name = "Security", description = "User Management")
 @RequestMapping("/api/v2/security/management/")
 @CrossOrigin
 public class UserManagementController {
@@ -38,8 +38,8 @@ public class UserManagementController {
   @Autowired
 	IUserManagementService uService;
  
-  @ApiOperation(value = "Returns a list of regular (non-admin) users")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Returns a list of regular users") })
+  @Operation(summary = "Returns a list of regular (non-admin) users")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Returns a list of regular users") })
 	@RequestMapping(value = "/user/admin/list", method = RequestMethod.GET)
 	HttpEntity<List<String>> listUsers() {
     
@@ -47,8 +47,8 @@ public class UserManagementController {
 		return new ResponseEntity<List<String>>(result, HttpStatus.OK);
 	}
   
-  @ApiOperation(value = "Creates a new user")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Creates a new user with the given user info") })
+  @Operation(summary = "Creates a new user")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Creates a new user with the given user info") })
 	@RequestMapping(value = "/user/admin/create", method = RequestMethod.POST, consumes = {MediaType.APPLICATION_JSON_VALUE})
 	HttpEntity<Boolean> createUser(@RequestBody Map<String, String> userInfo) {
 
@@ -56,8 +56,8 @@ public class UserManagementController {
 		return new ResponseEntity<Boolean>(result, HttpStatus.OK);
 	}
  
-  @ApiOperation(value = "Returns a user's info")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Returns a user's info") })
+  @Operation(summary = "Returns a user's info")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Returns a user's info") })
 	@RequestMapping(value = "/user/self/{username}", method = RequestMethod.GET)
 	HttpEntity<Map<String, String>> getUserInfo(@PathVariable("username") String username) {
     
@@ -65,8 +65,8 @@ public class UserManagementController {
 		return new ResponseEntity<Map<String, String>>(result, HttpStatus.OK);
 	}
  
-  @ApiOperation(value = "Lists a user's groups")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Lists a user's groups") })
+  @Operation(summary = "Lists a user's groups")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Lists a user's groups") })
 	@RequestMapping(value = "/user/admin/{username}/groups", method = RequestMethod.GET)
 	HttpEntity<List<String>> getUserGroups(@PathVariable("username") String username) {
     
@@ -74,8 +74,8 @@ public class UserManagementController {
 		return new ResponseEntity<List<String>>(result, HttpStatus.OK);
 	}
  
-  @ApiOperation(value = "Updates a user's info")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Updates a user's info") })
+  @Operation(summary = "Updates a user's info")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Updates a user's info") })
 	@RequestMapping(value = "/user/self/{username}/update", method = RequestMethod.PUT, consumes = {MediaType.APPLICATION_JSON_VALUE})
 	HttpEntity<Boolean> updateUser(@PathVariable("username") String username, @RequestBody Map<String, String> userInfo) {
     
@@ -83,8 +83,8 @@ public class UserManagementController {
 		return new ResponseEntity<Boolean>(result, HttpStatus.OK);
 	}
  
-  @ApiOperation(value = "Changes a user's password")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Changes a user's password") })
+  @Operation(summary = "Changes a user's password")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Changes a user's password") })
 	@RequestMapping(value = "/user/self/{username}/reset_password", method = RequestMethod.PUT)
 	HttpEntity<Boolean> changePassword(@PathVariable("username") String username, @RequestParam(value = "newPassword", required = true) String newPassword) {
     
@@ -92,8 +92,8 @@ public class UserManagementController {
 		return new ResponseEntity<Boolean>(result, HttpStatus.OK);
 	}
  
-  @ApiOperation(value = "Adds a user to a group")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Adds a user to a group") })
+  @Operation(summary = "Adds a user to a group")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Adds a user to a group") })
 	@RequestMapping(value = "/user/admin/{username}/add_to_group/{groupname}", method = RequestMethod.PUT)
 	HttpEntity<Boolean> addUserToGroup(@PathVariable("username") String username, @PathVariable("groupname") String groupname) {
     
@@ -101,8 +101,8 @@ public class UserManagementController {
 		return new ResponseEntity<Boolean>(result, HttpStatus.OK);
 	}
  
-  @ApiOperation(value = "Removes a user from a group")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Adds a user to a group") })
+  @Operation(summary = "Removes a user from a group")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Adds a user to a group") })
 	@RequestMapping(value = "/user/admin/{username}/remove_from_group/{groupname}", method = RequestMethod.DELETE)
 	HttpEntity<Boolean> removeUserFromGroup(@PathVariable("username") String username, @PathVariable("groupname") String groupname) {
     
@@ -110,8 +110,8 @@ public class UserManagementController {
 		return new ResponseEntity<Boolean>(result, HttpStatus.OK);
 	}
  
-  @ApiOperation(value = "Deletes a user")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Deletes a user") })
+  @Operation(summary = "Deletes a user")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Deletes a user") })
 	@RequestMapping(value = "/user/admin/{username}/delete", method = RequestMethod.DELETE)
 	HttpEntity<Boolean> deleteUser(@PathVariable("username") String username) {
     
@@ -119,8 +119,8 @@ public class UserManagementController {
 		return new ResponseEntity<Boolean>(result, HttpStatus.OK);
 	}
  
-  @ApiOperation(value = "Returns a list of groups")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Returns a list of groups") })
+  @Operation(summary = "Returns a list of groups")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Returns a list of groups") })
 	@RequestMapping(value = "/group/admin/list", method = RequestMethod.GET)
 	HttpEntity<List<String>> listGroups() {
     
@@ -128,8 +128,8 @@ public class UserManagementController {
 		return new ResponseEntity<List<String>>(result, HttpStatus.OK);
 	}
  
-  @ApiOperation(value = "Creates a new group")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Creates a new group with the given group info") })
+  @Operation(summary = "Creates a new group")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Creates a new group with the given group info") })
 	@RequestMapping(value = "/group/admin/create", method = RequestMethod.POST, consumes = {MediaType.APPLICATION_JSON_VALUE})
 	HttpEntity<Boolean> createGroup(@RequestBody Map<String, String> groupInfo) {
     
@@ -137,8 +137,8 @@ public class UserManagementController {
 		return new ResponseEntity<Boolean>(result, HttpStatus.OK);
 	}
  
-  @ApiOperation(value = "Returns a group's info")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Returns a group's info") })
+  @Operation(summary = "Returns a group's info")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Returns a group's info") })
 	@RequestMapping(value = "/group/admin/{groupname}", method = RequestMethod.GET)
 	HttpEntity<Map<String, String>> getGroupInfo(@PathVariable("groupname") String groupname) {
     
@@ -146,8 +146,8 @@ public class UserManagementController {
 		return new ResponseEntity<Map<String, String>>(result, HttpStatus.OK);
 	}
  
-  @ApiOperation(value = "Lists a group's members")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Lists a group's members") })
+  @Operation(summary = "Lists a group's members")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Lists a group's members") })
 	@RequestMapping(value = "/group/admin/{groupname}/members", method = RequestMethod.GET)
 	HttpEntity<List<String>> getGroupMembers(@PathVariable("groupname") String groupname) {
     
@@ -155,8 +155,8 @@ public class UserManagementController {
 		return new ResponseEntity<List<String>>(result, HttpStatus.OK);
 	}
  
-  @ApiOperation(value = "Updates a group's info")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Updates a group's info") })
+  @Operation(summary = "Updates a group's info")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Updates a group's info") })
 	@RequestMapping(value = "/group/admin/{groupname}/update", method = RequestMethod.PUT, consumes = {MediaType.APPLICATION_JSON_VALUE})
 	HttpEntity<Boolean> updateGroup(@PathVariable("groupname") String groupname, @RequestBody Map<String, String> groupInfo) {
     
@@ -164,8 +164,8 @@ public class UserManagementController {
 		return new ResponseEntity<Boolean>(result, HttpStatus.OK);
 	}
  
-  @ApiOperation(value = "Deletes a group")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Deletes a group") })
+  @Operation(summary = "Deletes a group")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Deletes a group") })
 	@RequestMapping(value = "/group/admin/{groupname}/delete", method = RequestMethod.DELETE)
 	HttpEntity<Boolean> deleteGroup(@PathVariable("groupname") String groupname) {
     
