@@ -152,10 +152,10 @@ public class HarvestingInformationController {
 			return new ResponseEntity<Page<IHarvestingResult>>(result, HttpStatus.OK);
 
 		} catch (HarvesterInfoServiceException e) {
-			logger.error("getHarvestingHistoryByAcronym: " + e.getMessage(), e);
+			logger.error("getHarvestingHistoryByAcronym: " + e.getMessage());
 			return new ResponseEntity<Page<IHarvestingResult>>(HttpStatus.NOT_FOUND);
 		} catch (Exception e) {
-			logger.error("getHarvestingHistoryByAcronym: " + e.getMessage(), e);
+			logger.error("getHarvestingHistoryByAcronym: " + e.getMessage());
 			return new ResponseEntity<Page<IHarvestingResult>>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 

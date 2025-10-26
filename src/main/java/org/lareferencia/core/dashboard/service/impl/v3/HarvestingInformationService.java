@@ -64,16 +64,10 @@ public class HarvestingInformationService implements IHarvestingInformationServi
 
 		Network network = findHarvestingSourceByAcronym(sourceAcronym);
 
-		// if no sort is defined or sort contains invalid values, sort by end date descending
-		// Fix for Swagger UI sending invalid sort parameters like '["string"]'
-		try {
-			if (pageable.getSort().isEmpty() || !isValidSort(pageable.getSort())) {
-				pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("endTime").descending());
-			}
-		} catch (Exception e) {
-			// If there's any error with sort, use default
-			pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("endTime").descending());
-		}
+		// if no sort is defined, sort by end date descending
+		if (pageable.getSort().isEmpty()) 
+        	pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("endTime").descending());
+    
 
 		// get the page
 		// TODO: add filter by status
@@ -84,29 +78,6 @@ public class HarvestingInformationService implements IHarvestingInformationServi
 				pageable, page.getTotalElements());
 
 		return results;
-	}
-	
-	/**
-	 * Validates that the Sort contains valid property names for NetworkSnapshot
-	 * Prevents errors when Swagger UI sends invalid sort parameters
-	 */
-	private boolean isValidSort(Sort sort) {
-		// List of valid sortable properties for NetworkSnapshot
-		List<String> validProperties = List.of("id", "endTime", "startTime", "status");
-		
-		for (Sort.Order order : sort) {
-			String property = order.getProperty();
-			// Check if property starts with invalid characters or contains brackets
-			if (property.contains("[") || property.contains("]") || property.contains("\"")) {
-				return false;
-			}
-			// Optionally, check if it's a valid property
-			if (!validProperties.contains(property)) {
-				logger.warn("Invalid sort property: " + property + ", will use default sort");
-				return false;
-			}
-		}
-		return true;
 	}
 	
 
