@@ -12,7 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lareferencia.backend.domain.NetworkSnapshot;
 import org.lareferencia.backend.domain.ValidatorRule;
-import org.lareferencia.backend.domain.parquet.ValidationStatObservationParquet;
+import org.lareferencia.backend.domain.validation.ValidationStatObservation;
 import org.lareferencia.backend.repositories.jpa.NetworkSnapshotRepository;
 import org.lareferencia.backend.validation.IValidationStatisticsService;
 import org.lareferencia.backend.validation.ValidationStatisticsException;
@@ -134,7 +134,7 @@ public class ValidationResultService implements IValidationInformationService {
 			// Procesar observaciones para extraer conteos de ocurrencias
 			Map<String, Integer> occurrenceCounts = new HashMap<>();
 			
-			for (ValidationStatObservationParquet obs : queryResult.getContent()) {
+			for (ValidationStatObservation obs : queryResult.getContent()) {
 				Map<String, List<String>> occurrenceMap = isValid ? 
 					obs.getValidOccurrencesByRuleID() : 
 					obs.getInvalidOccurrencesByRuleID();
@@ -258,14 +258,14 @@ public class ValidationResultService implements IValidationInformationService {
 	}
 	
 	/**
-	 * Adapter class to convert ValidationStatObservationParquet to IRecordValidationResult
+	 * Adapter class to convert ValidationStatObservation to IRecordValidationResult
 	 * Eliminates the need for the separate adapter class
 	 */
 	private static class ValidationStatObservationAdapter implements IRecordValidationResult {
 		
-		private final ValidationStatObservationParquet observation;
+		private final ValidationStatObservation observation;
 		
-		public ValidationStatObservationAdapter(ValidationStatObservationParquet observation) {
+		public ValidationStatObservationAdapter(ValidationStatObservation observation) {
 			this.observation = observation;
 		}
 
