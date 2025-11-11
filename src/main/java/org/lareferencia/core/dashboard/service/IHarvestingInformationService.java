@@ -32,9 +32,9 @@ public interface IHarvestingInformationService {
 
 	Page<IHarvestingResult> getHarvestingHistoryBySourceAcronym(String sourceAcronym , LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) throws HarvesterInfoServiceException;
  
-    String getRecordMetadataByRecordIDAndSourceAcronym(String sourceAcronym, Long recordID) throws HarvesterInfoServiceException;
+    // String getRecordMetadataByRecordIDAndSourceAcronym(String sourceAcronym, Long recordID) throws HarvesterInfoServiceException;
 
-	String getRecordMetadataBySnapshotAndIdentifier(Long snapshotId, String identifier) throws HarvesterInfoServiceException;
+	// String getRecordMetadataBySnapshotAndIdentifier(Long snapshotId, String identifier) throws HarvesterInfoServiceException;
 
 	
 

@@ -218,21 +218,21 @@ public class HarvestingInformationController {
 	}
 
 
-	@Operation(summary = "Returns the metadata for a record by snapshot id and identifier")
-	@ApiResponses(value = {
-	@ApiResponse(responseCode = "200", description = "Returns the metadata for a record by snapshot id and identifier") })
-	@RequestMapping(value = "/{sourceAcronym}/record", method = RequestMethod.GET)
+	// @Operation(summary = "Returns the metadata for a record by snapshot id and identifier")
+	// @ApiResponses(value = {
+	// @ApiResponse(responseCode = "200", description = "Returns the metadata for a record by snapshot id and identifier") })
+	// @RequestMapping(value = "/{sourceAcronym}/record", method = RequestMethod.GET)
 
-	HttpEntity<String> getRecordMetadataBySnapshotAndIdentifier(@PathVariable("sourceAcronym") String sourceAcronym,
-			@Parameter(description = "OAI Identifier", required = true) @RequestParam("identifier") String identifier,
-    		@Parameter(description = "Harvesting ID", required = true, example = "1") @RequestParam("harvestingID") Long harvestingID
-    	) throws HarvesterInfoServiceException {
+	// HttpEntity<String> getRecordMetadataBySnapshotAndIdentifier(@PathVariable("sourceAcronym") String sourceAcronym,
+	// 		@Parameter(description = "OAI Identifier", required = true) @RequestParam("identifier") String identifier,
+    // 		@Parameter(description = "Harvesting ID", required = true, example = "1") @RequestParam("harvestingID") Long harvestingID
+    // 	) throws HarvesterInfoServiceException {
 
-		String result = hService.getRecordMetadataBySnapshotAndIdentifier(harvestingID, identifier);
+	// 	String result = hService.getRecordMetadataBySnapshotAndIdentifier(harvestingID, identifier);
 
-		return new ResponseEntity<String>(result, HttpStatus.OK);
+	// 	return new ResponseEntity<String>(result, HttpStatus.OK);
 
-	}
+	// }
 
 	
 	

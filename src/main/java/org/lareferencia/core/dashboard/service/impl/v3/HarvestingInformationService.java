@@ -17,7 +17,6 @@ import org.lareferencia.core.dashboard.service.HarvesterInfoServiceException;
 import org.lareferencia.core.dashboard.service.IHarvestingInformationService;
 import org.lareferencia.core.dashboard.service.IHarvestingResult;
 import org.lareferencia.core.dashboard.service.IHarvestingSource;
-import org.lareferencia.core.metadata.IMetadataRecordStoreService;
 import org.lareferencia.core.metadata.MetadataRecordStoreException;
 import org.lareferencia.core.metadata.OAIRecordMetadataParseException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,8 +40,7 @@ public class HarvestingInformationService implements IHarvestingInformationServi
 	@Autowired
 	NetworkSnapshotRepository snapshotRepository;
  
-	@Autowired 
-	IMetadataRecordStoreService metadataRecordService;
+
 
 
 	public Page<IHarvestingResult> getHarvestingHistoryBySourceID(Long sourceID, Pageable pageable)
@@ -159,22 +157,22 @@ public class HarvestingInformationService implements IHarvestingInformationServi
 
 	}
  
-  @Override
-  public String getRecordMetadataByRecordIDAndSourceAcronym(String sourceAcronym, Long recordID) throws HarvesterInfoServiceException {
+//   @Override
+//   public String getRecordMetadataByRecordIDAndSourceAcronym(String sourceAcronym, Long recordID) throws HarvesterInfoServiceException {
     
-	 OAIRecord record = metadataRecordService.findRecordByRecordId(recordID);
+// 	 OAIRecord record = metadataRecordService.findRecordByRecordId(recordID);
 	 
-		if (record != null && record.getSnapshot().getNetwork().getAcronym().equals(sourceAcronym))
-			try {
-				return metadataRecordService.getPublishedMetadata(record).toString();
-			} catch (OAIRecordMetadataParseException | MetadataRecordStoreException e) {
-				throw new HarvesterInfoServiceException(
-						"Record w/ ID:" + recordID + " metadata exception: " + e.getMessage());
-			} 
-		else
-			throw new HarvesterInfoServiceException("Record w/ ID:" + recordID + "does not exist");
+// 		if (record != null && record.getSnapshot().getNetwork().getAcronym().equals(sourceAcronym))
+// 			try {
+// 				return metadataRecordService.getPublishedMetadata(record).toString();
+// 			} catch (OAIRecordMetadataParseException | MetadataRecordStoreException e) {
+// 				throw new HarvesterInfoServiceException(
+// 						"Record w/ ID:" + recordID + " metadata exception: " + e.getMessage());
+// 			} 
+// 		else
+// 			throw new HarvesterInfoServiceException("Record w/ ID:" + recordID + "does not exist");
 
-  }
+//   }
 
 	private Network findHarvestingSourceByID(Long sourceID) throws HarvesterInfoServiceException {
 
@@ -194,22 +192,22 @@ public class HarvestingInformationService implements IHarvestingInformationServi
 		return network;
 	}
 
-	@Override
-	public String getRecordMetadataBySnapshotAndIdentifier(Long snapshotId, String identifier) throws HarvesterInfoServiceException {
+	// @Override
+	// public String getRecordMetadataBySnapshotAndIdentifier(Long snapshotId, String identifier) throws HarvesterInfoServiceException {
 	
-		OAIRecord record = metadataRecordService.findRecordByIdentifier(snapshotId, identifier);
-		if (record != null )
-			try {
-				return metadataRecordService.getPublishedMetadata(record).toString();
-			} catch (OAIRecordMetadataParseException | MetadataRecordStoreException e) {
-				throw new HarvesterInfoServiceException(
-						"Record w/ ID:" + record.getId() + " metadata exception: " + e.getMessage());
-			}
-		else
-			return "No record found - Probably the diagnose report is outdated";
+	// 	OAIRecord record = metadataRecordService.findRecordByIdentifier(snapshotId, identifier);
+	// 	if (record != null )
+	// 		try {
+	// 			return metadataRecordService.getPublishedMetadata(record).toString();
+	// 		} catch (OAIRecordMetadataParseException | MetadataRecordStoreException e) {
+	// 			throw new HarvesterInfoServiceException(
+	// 					"Record w/ ID:" + record.getId() + " metadata exception: " + e.getMessage());
+	// 		}
+	// 	else
+	// 		return "No record found - Probably the diagnose report is outdated";
 		
 
-	}
+	// }
  
 
 }
