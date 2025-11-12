@@ -23,11 +23,17 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 
+import org.lareferencia.core.repository.parquet.ValidationStatParquetRepository;
+import org.lareferencia.core.util.IRecordFingerprintHelper;
+import org.lareferencia.core.util.PrefixedRecordFingerprintHelper;
+import org.lareferencia.core.service.validation.IValidationStatisticsService;
+import org.lareferencia.core.service.validation.ValidationStatisticsParquetService;
+
 
 @SpringBootApplication
-@ComponentScan(  basePackages={ "org.lareferencia.core.dashboard", "org.lareferencia.app.dashboard" } )
-@EntityScan( basePackages= { "org.lareferencia.backend.domain", "org.lareferencia.core.oabroker" } )
-@EnableJpaRepositories( basePackages={ "org.lareferencia.backend.repositories.jpa", "org.lareferencia.core.oabroker" } )
+@ComponentScan(  basePackages={ "org.lareferencia.dashboard", "org.lareferencia.app.dashboard" } )
+@EntityScan( basePackages= { "org.lareferencia.core.domain", "org.lareferencia.core.oabroker" } )
+@EnableJpaRepositories( basePackages={ "org.lareferencia.core.repository.jpa", "org.lareferencia.core.oabroker" } )
 @EnableSpringDataWebSupport(pageSerializationMode = PageSerializationMode.VIA_DTO)
 @EnableAutoConfiguration( exclude = {
 	    org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
@@ -78,21 +84,21 @@ public class DashboardApplication {
 
     /** Bean para el repositorio Parquet de estadísticas de validación */
     @Bean
-    public org.lareferencia.backend.repositories.parquet.ValidationStatParquetRepository validationStatParquetRepository() {
-        return new org.lareferencia.backend.repositories.parquet.ValidationStatParquetRepository();
+    public ValidationStatParquetRepository validationStatParquetRepository() {
+        return new ValidationStatParquetRepository();
     }
 
     /** Bean para el helper de fingerprint de registros */
     @Bean
-    public org.lareferencia.core.util.IRecordFingerprintHelper fingerprintHelper() {
-        return new org.lareferencia.core.util.PrefixedRecordFingerprintHelper();
+    public IRecordFingerprintHelper fingerprintHelper() {
+        return new PrefixedRecordFingerprintHelper();
     }
 
     /** Bean para el servicio de estadísticas de validación Parquet */
     @Bean(name = "validationStatisticsParquetService")
-    public org.lareferencia.backend.validation.IValidationStatisticsService validationStatisticsParquetService() {
+    public IValidationStatisticsService validationStatisticsParquetService() {
         // Crear una instancia del servicio Parquet
-        return new org.lareferencia.backend.validation.ValidationStatisticsParquetService();
+        return new ValidationStatisticsParquetService();
     }
 
 

@@ -1,7 +1,7 @@
 
 package org.lareferencia.dashboard.app;
 
-import org.lareferencia.core.dashboard.service.ValidationInformationServiceException;
+import org.lareferencia.dashboard.service.ValidationInformationServiceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
