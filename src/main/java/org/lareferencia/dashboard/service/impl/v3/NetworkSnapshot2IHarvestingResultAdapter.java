@@ -1,0 +1,58 @@
+
+package org.lareferencia.dashboard.service.impl.v3;
+
+import java.time.LocalDateTime;
+import org.lareferencia.core.domain.NetworkSnapshot;
+import org.lareferencia.dashboard.service.IHarvestingResult;
+
+public class NetworkSnapshot2IHarvestingResultAdapter implements IHarvestingResult {
+
+	NetworkSnapshot source;
+	
+	public NetworkSnapshot2IHarvestingResultAdapter(NetworkSnapshot source) {
+		this.source = source;
+	}
+
+	@Override
+	public Long getId() {
+		return source.getId();
+	}
+
+	@Override
+	public LocalDateTime getStartTime() {
+
+		return source.getStartTime();
+	}
+
+	@Override
+	public LocalDateTime getEndTime() {
+
+		return source.getEndTime();
+	}
+
+	@Override
+	public String getStatus() {
+		return source.getStatus().toString();
+	}
+
+	@Override
+	public Integer getHarvestedSize() {
+		return source.getSize();
+	}
+
+	@Override
+	public Integer getValidSize() {
+		return source.getValidSize();
+	}
+
+	@Override
+	public Integer getTransformedSize() {
+		return source.getTransformedSize();
+	}
+
+	@Override
+	public Boolean isDeleted() {
+		return source.isDeleted();
+	}
+	
+}
