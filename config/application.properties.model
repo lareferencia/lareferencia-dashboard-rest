@@ -85,8 +85,28 @@ elastic.authenticate=false
 # ==============================================================================
 
 # ==============================================================================
-# ADDITIONAL CONFIGURATION
+# KEYCLOAK CONFIGURATION
 # ==============================================================================
+
+# Keycloak server URL
+keycloak.auth-server-url=https://auth.lareferencia.info/
+
+# Keycloak realm
+keycloak.realm=lareferencia
+
+# Keycloak client ID
+keycloak.resource=dashboard-lareferencia-api
+
+# Keycloak client secret
+keycloak.credentials.secret=[OAUTH_CLIENT_SECRET]
+
+# User management properties
+user-mgmt.client-id=admin-cli
+user-mgmt.client-secret=[OAUTH_CLIENT_SECRET]
+
+## Uncomment to disable Keycloak security
+keycloak.enabled=false
+
 
 # ==============================================================================
 # END OF CONFIGURATION

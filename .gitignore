@@ -84,4 +84,3 @@ nb-configuration.xml
 .DS_Store
 config/third-party-context.xml
 config/application.properties
-config/application.properties.d/02-keycloack.properties
