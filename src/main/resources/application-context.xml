@@ -56,7 +56,7 @@
     <bean id="snapshotStore" class="org.lareferencia.core.metadata.SnapshotStoreSQLImpl" scope="singleton"></bean>
     <bean id="hashingHelper" class="org.lareferencia.core.util.hashing.XXHash64Hashing" scope="singleton"></bean>
     
-	<import resource="file:${config.dir.path}/custom-context.xml"/>
+	<import resource="file:${app.config.dir}/custom-context.xml"/>
 	
 	
 </beans>

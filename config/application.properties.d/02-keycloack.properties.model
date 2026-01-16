@@ -1,0 +1,49 @@
+## Authentication
+keycloak.auth-server-url = https://auth.lareferencia.info/
+keycloak.realm = lareferencia
+keycloak.resource = dashboard-lareferencia-api
+keycloak.ssl-required = none
+keycloak.confidential-port = 443
+keycloak.cors = true
+keycloak.security-constraints[0].authRoles[0] = dashboard-user
+keycloak.security-constraints[0].authRoles[1] = dashboard-admin
+keycloak.security-constraints[0].securityCollections[0].patterns[0] = /*
+
+## Authorization
+keycloak.public-client = false
+keycloak.credentials.secret = [OAUTH_CLIENT_SECRET]
+keycloak.policy-enforcer-config.enforcement-mode = enforcing
+keycloak.policy-enforcer-config.claimInformationPointConfig.claims[http.uri]={request.relativePath}
+keycloak.policy-enforcer-config.paths[0].path = /*
+keycloak.policy-enforcer-config.paths[0].methods[0].method = GET
+keycloak.policy-enforcer-config.paths[1].path = /api/v2/harvesting/source/list
+keycloak.policy-enforcer-config.paths[1].methods[0].method = GET
+keycloak.policy-enforcer-config.paths[2].path = /api/v2/harvesting/source/{sourceAcronym}/*
+keycloak.policy-enforcer-config.paths[2].methods[0].method = GET
+keycloak.policy-enforcer-config.paths[3].path = /api/v2/validation/source/{sourceAcronym}/*
+keycloak.policy-enforcer-config.paths[3].methods[0].method = GET
+keycloak.policy-enforcer-config.paths[4].path = /api/v2/security/management/group/admin/*
+keycloak.policy-enforcer-config.paths[4].methods[0].method = GET
+keycloak.policy-enforcer-config.paths[4].methods[1].method = POST
+keycloak.policy-enforcer-config.paths[4].methods[2].method = PUT
+keycloak.policy-enforcer-config.paths[4].methods[3].method = DELETE
+keycloak.policy-enforcer-config.paths[5].path = /api/v2/security/management/user/admin/*
+keycloak.policy-enforcer-config.paths[5].methods[0].method = GET
+keycloak.policy-enforcer-config.paths[5].methods[1].method = POST
+keycloak.policy-enforcer-config.paths[5].methods[2].method = PUT
+keycloak.policy-enforcer-config.paths[5].methods[3].method = DELETE
+keycloak.policy-enforcer-config.paths[6].path = /api/v2/security/management/user/self/*
+keycloak.policy-enforcer-config.paths[6].methods[0].method = GET
+keycloak.policy-enforcer-config.paths[6].methods[1].method = PUT
+
+#Custom authorization properties
+authz.admin-role = dashboard-admin
+
+#User management properties
+user-mgmt.token-endpoint = /realms/lareferencia/protocol/openid-connect/token
+user-mgmt.client-id = admin-cli
+user-mgmt.client-secret = [OAUTH_CLIENT_SECRET]
+user-mgmt.user-role = dashboard-user
+user-mgmt.default-roles = dashboard-user
+user-mgmt.user-attributes = telephone,position,affiliation
+user-mgmt.group-attributes = long_name

@@ -1,94 +1,93 @@
-# NOTE: Spring Data Solr was removed in Spring Boot 3.x
-# If you need Solr functionality, use Apache Solr Client directly
-# See SOLR_MIGRATION_NOTES.md for details
+# ==============================================================================
+# LA REFERENCIA SHELL- APPLICATION CONFIGURATION TEMPLATE
+# ==============================================================================
+# This file serves as a template for configuring the LA Referencia LRHarvester
+# application. Copy this file to 'application.properties' and adjust the values
+# according to your environment.
+#
+# ==============================================================================
 
-## Spring DATASOURCE (DataSourceAutoConfiguration & DataSourceProperties)
+
+# ==============================================================================
+# 1. GENERAL CONFIGURATION
+# ==============================================================================
+
+
+# ==============================================================================
+# 2. DATABASE SETTINGS
+# ==============================================================================
+
+# PostgreSQL connection URL
+# Format: jdbc:postgresql://<host>:<port>/<database>
+# Default: jdbc:postgresql://localhost:5432/lrharvester
 spring.datasource.url=jdbc:postgresql://localhost:5432/lrharvester
+
+# Database credentials
+# Default: lrharvester
 spring.datasource.username=lrharvester
 spring.datasource.password=lrharvester
 
-server.port=8092
+# ------------------------------------------------------------------------------
+# Alternative Database Configurations (Uncomment to use)
+# ------------------------------------------------------------------------------
 
-spring.jackson.serialization.fail-on-empty-beans=false
+# H2 Database
+# spring.datasource.url=jdbc:h2:file:${store.basepath}/lrharvester-shell;DB_CLOSE_DELAY=-1
+# spring.datasource.username=sa
+# spring.datasource.password=
+# spring.datasource.driver-class-name=org.h2.Driver
+# spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
 
-# The SQL dialect makes Hibernate generate better SQL for the chosen database
-spring.jpa.properties.hibernate.dialect = org.hibernate.dialect.PostgreSQLDialect
-spring.jpa.hibernate.naming.physical-strategy=org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+# SQLite Database
+# spring.datasource.url=jdbc:sqlite:${store.basepath}/lrharvester-shell.db
+# spring.datasource.username=
+# spring.datasource.password=
+# spring.datasource.driver-class-name=org.sqlite.JDBC
+# spring.jpa.database-platform=org.hibernate.community.dialect.SQLiteDialect
 
-#spring.jpa.show-sql=true
-#spring.jpa.properties.hibernate.format_sql=true
+# ==============================================================================
+# 3. SECURITY
+# ==============================================================================
 
-# Hibernate ddl auto (create, create-drop, validate, update)
-spring.jpa.hibernate.ddl-auto = none
 
-default.solr.server = http://localhost:8983/solr
+# ==============================================================================
+# 4. STORAGE
+# ==============================================================================
 
-#config path
-config.dir.path = config
+# Base directory for data storage
+# This directory will contain OAI records catalog and validation statistics
+# Default: /tmp/data/
+store.basepath=/tmp/data/
 
-# Validation Stats config
-vstats.solr.server=http://localhost:8983/solr
-vstats.solr.core=vstats
 
-server.contextPath="/api/v2"
-rest.lareferencia.spec="lareferencia-dashboard-api-v2"
-rest.lareferencia.metadata.title="LA Referencia Dashboard API"
-rest.lareferencia.metadata.description="API Services for LA Referencia repository dashboard service"
-rest.lareferencia.metadata.version=2.0.0
-rest.lareferencia.metadata.license="GNU General Public License"
-rest.lareferencia.metadata.licenseurl="https://www.gnu.org/licenses/"
+# ==============================================================================
+# 5. INDEXING ENGINE
+# ==============================================================================
 
-# Keycloak properties
+# Solr configuration (using direct client in Spring Boot 3.x)
+solr.host=http://localhost:8983/solr
 
-## Uncomment to disable Keycloak security
-#keycloak.enabled = false
+# Elasticsearch configuration
+elastic.host=localhost
+elastic.port=9200 
+elastic.username=elastic 
+elastic.password=admin12345
+elastic.useSSL=false
+elastic.authenticate=false
 
-## Authentication
-keycloak.auth-server-url = http://demo.lareferencia.info:8280
-keycloak.realm = lareferencia
-keycloak.resource = dashboard-lareferencia-api
-keycloak.ssl-required = none
-keycloak.confidential-port = 443
-keycloak.cors = true
-keycloak.security-constraints[0].authRoles[0] = dashboard-user
-keycloak.security-constraints[0].authRoles[1] = dashboard-admin
-keycloak.security-constraints[0].securityCollections[0].patterns[0] = /*
+# ==============================================================================
+# 6. INTEGRATION SERVICES
+# ==============================================================================
 
-## Authorization
-keycloak.public-client = false
-keycloak.credentials.secret = 4f9dd323-7a4d-4671-9750-7a0262c8f5bd
-keycloak.policy-enforcer-config.enforcement-mode = enforcing
-keycloak.policy-enforcer-config.claimInformationPointConfig.claims[http.uri]={request.relativePath}
-keycloak.policy-enforcer-config.paths[0].path = /*
-keycloak.policy-enforcer-config.paths[0].methods[0].method = GET
-keycloak.policy-enforcer-config.paths[1].path = /api/v2/harvesting/source/list
-keycloak.policy-enforcer-config.paths[1].methods[0].method = GET
-keycloak.policy-enforcer-config.paths[2].path = /api/v2/harvesting/source/{sourceAcronym}/*
-keycloak.policy-enforcer-config.paths[2].methods[0].method = GET
-keycloak.policy-enforcer-config.paths[3].path = /api/v2/validation/source/{sourceAcronym}/*
-keycloak.policy-enforcer-config.paths[3].methods[0].method = GET
-keycloak.policy-enforcer-config.paths[4].path = /api/v2/security/management/group/admin/*
-keycloak.policy-enforcer-config.paths[4].methods[0].method = GET
-keycloak.policy-enforcer-config.paths[4].methods[1].method = POST
-keycloak.policy-enforcer-config.paths[4].methods[2].method = PUT
-keycloak.policy-enforcer-config.paths[4].methods[3].method = DELETE
-keycloak.policy-enforcer-config.paths[5].path = /api/v2/security/management/user/admin/*
-keycloak.policy-enforcer-config.paths[5].methods[0].method = GET
-keycloak.policy-enforcer-config.paths[5].methods[1].method = POST
-keycloak.policy-enforcer-config.paths[5].methods[2].method = PUT
-keycloak.policy-enforcer-config.paths[5].methods[3].method = DELETE
-keycloak.policy-enforcer-config.paths[6].path = /api/v2/security/management/user/self/*
-keycloak.policy-enforcer-config.paths[6].methods[0].method = GET
-keycloak.policy-enforcer-config.paths[6].methods[1].method = PUT
 
-#Custom authorization properties
-authz.admin-role = dashboard-admin
+# ==============================================================================
+# 7. WORKFLOW CONFIGURATION
+# ==============================================================================
 
-#User management properties
-user-mgmt.token-endpoint = /realms/lareferencia/protocol/openid-connect/token
-user-mgmt.client-id = admin-cli
-user-mgmt.client-secret = e559d943-edd5-4fac-b924-c75edbfe7ab5
-user-mgmt.user-role = dashboard-user
-user-mgmt.default-roles = dashboard-user
-user-mgmt.user-attributes = telephone,position,affiliation
-user-mgmt.group-attributes = long_name
+# ==============================================================================
+# ADDITIONAL CONFIGURATION
+# ==============================================================================
+
+# ==============================================================================
+# END OF CONFIGURATION
+# ==============================================================================
