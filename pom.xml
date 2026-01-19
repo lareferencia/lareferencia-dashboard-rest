@@ -29,7 +29,7 @@
     <parent>
         <groupId>org.lareferencia</groupId>
         <artifactId>lareferencia-parent</artifactId>
-        <version>5.0.0-alpha</version>
+        <version>5.0.0-beta</version>
     </parent>
 	
 
@@ -44,7 +44,7 @@
 		<dependency>
             <groupId>org.lareferencia</groupId>
             <artifactId>lareferencia-core-lib</artifactId>
-            <version>5.0.0-alpha</version>
+            <version>5.0.0-beta</version>
             <exclusions>
                 <!-- Exclude Jersey 1.x from Hadoop dependencies to avoid JAX-RS conflicts -->
                 <exclusion>
