@@ -1,8 +1,8 @@
 # ==============================================================================
-# LA REFERENCIA SHELL- APPLICATION CONFIGURATION TEMPLATE
+# LA REFERENCIA DASHBOARD - APPLICATION CONFIGURATION TEMPLATE
 # ==============================================================================
-# This file serves as a template for configuring the LA Referencia LRHarvester
-# application. Copy this file to 'application.properties' and adjust the values
+# This file serves as a template for configuring the LA Referencia Dashboard
+# REST API. Copy this file to 'application.properties' and adjust the values
 # according to your environment.
 #
 # ==============================================================================

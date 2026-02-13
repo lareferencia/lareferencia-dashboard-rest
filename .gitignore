@@ -84,3 +84,6 @@ nb-configuration.xml
 .DS_Store
 config/third-party-context.xml
 config/application.properties
+
+# Docker local override
+config/application.properties.d/99-docker.properties

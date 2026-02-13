@@ -1,37 +1,23 @@
 package org.lareferencia.dashboard.app;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.lareferencia.core.util.ConfigPathResolver;
+import org.lareferencia.core.util.PropertiesDirectoryListener;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.lareferencia.core.util.ConfigPathResolver;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
-import org.springframework.context.ApplicationListener;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.support.ResourcePropertySource;
-
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.data.web.config.EnableSpringDataWebSupport.PageSerializationMode;
-
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-// REMOVED: WebMvcConfigurerAdapter was deprecated in Spring 5.0 and removed in Spring 6.0
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -67,49 +53,6 @@ public class DashboardApplication {
                                 .listeners(new PropertiesDirectoryListener());
 
                 builder.run(args);
-        }
-
-        /**
-         * Listener that loads properties from
-         * ${app.config.dir}/application.properties.d/*.properties
-         */
-        private static class PropertiesDirectoryListener
-                        implements ApplicationListener<ApplicationEnvironmentPreparedEvent> {
-
-                @Override
-                public void onApplicationEvent(ApplicationEnvironmentPreparedEvent event) {
-                        Path dir = ConfigPathResolver.resolvePath("application.properties.d");
-
-                        if (!Files.exists(dir) || !Files.isDirectory(dir)) {
-                                System.out.println("[PropertiesLoader] Directory not found: " + dir);
-                                return;
-                        }
-
-                        try (Stream<Path> stream = Files.list(dir)) {
-                                ConfigurableEnvironment env = event.getEnvironment();
-
-                                List<Path> propertyFiles = stream
-                                                .filter(p -> p.toString().endsWith(".properties"))
-                                                .sorted()
-                                                .collect(Collectors.toList());
-
-                                for (Path file : propertyFiles) {
-                                        try {
-                                                ResourcePropertySource source = new ResourcePropertySource(
-                                                                "custom-" + file.getFileName().toString(),
-                                                                new FileSystemResource(file.toFile()));
-                                                env.getPropertySources().addLast(source);
-                                                System.out.println("[PropertiesLoader] Loaded: " + file.getFileName());
-                                        } catch (IOException e) {
-                                                System.err.println("[PropertiesLoader] Failed to load: " + file + " - "
-                                                                + e.getMessage());
-                                        }
-                                }
-
-                        } catch (IOException e) {
-                                System.err.println("[PropertiesLoader] Error listing directory: " + e.getMessage());
-                        }
-                }
         }
 
         /**
