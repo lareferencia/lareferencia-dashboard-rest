@@ -3,11 +3,18 @@ package org.lareferencia.dashboard.security;
 
 import java.util.List;
 
-import jakarta.servlet.http.HttpServletRequest;
-
+/**
+ * Access to the authenticated JWT identity used by dashboard services.
+ */
 public interface ISecurityService {
-	
-	List<String> getRequestGroups(HttpServletRequest request);
-	Boolean isAdminRequest(HttpServletRequest request);
-		
+
+	List<String> getCurrentUserGroups();
+
+	boolean isCurrentUserAdmin();
+
+	String getCurrentUsername();
+
+	void checkSourceAccess(String sourceAcronym);
+
+	void checkSelfAccess(String username);
 }

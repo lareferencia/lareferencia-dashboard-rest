@@ -11,7 +11,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 @Service
-@ConditionalOnProperty(name = "keycloak.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(name = "user-mgmt.enabled", havingValue = "true", matchIfMissing = true)
 public class KeycloakUserManagementService implements IUserManagementService {
 
   @Value("${keycloak.auth-server-url}")

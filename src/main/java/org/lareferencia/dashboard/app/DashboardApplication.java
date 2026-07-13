@@ -16,8 +16,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.data.web.config.EnableSpringDataWebSupport.PageSerializationMode;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -31,7 +29,6 @@ import io.swagger.v3.oas.models.info.License;
 @EnableJpaRepositories(basePackages = { "org.lareferencia.core.repository.jpa", "org.lareferencia.core.oabroker" })
 @EnableSpringDataWebSupport(pageSerializationMode = PageSerializationMode.VIA_DTO)
 @EnableAutoConfiguration(exclude = {
-                org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
                 org.springframework.boot.autoconfigure.data.rest.RepositoryRestMvcAutoConfiguration.class,
                 org.springdoc.core.configuration.SpringDocDataRestConfiguration.class,
                 org.springdoc.core.configuration.SpringDocHateoasConfiguration.class
@@ -78,21 +75,6 @@ public class DashboardApplication {
                                                                 .url(enviroment.getProperty(
                                                                                 "rest.lareferencia.metadata.licenseurl",
                                                                                 "https://www.gnu.org/licenses/gpl-3.0.html"))));
-        }
-
-        /**
-         * CORS configuration - Updated for Spring 6.0
-         * Using WebMvcConfigurer interface directly instead of deprecated
-         * WebMvcConfigurerAdapter
-         */
-        @Bean
-        public WebMvcConfigurer corsConfigurer() {
-                return new WebMvcConfigurer() {
-                        @Override
-                        public void addCorsMappings(CorsRegistry registry) {
-                                registry.addMapping("/**").allowedOrigins("*");
-                        }
-                };
         }
 
 }

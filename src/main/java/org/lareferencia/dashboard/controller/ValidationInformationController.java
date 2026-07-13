@@ -29,7 +29,6 @@
 package org.lareferencia.dashboard.controller;
 
 import org.lareferencia.dashboard.service.IRecordValidationResult;
-import org.lareferencia.core.service.validation.IValidationStatisticsService;
 import org.lareferencia.core.service.validation.ValidationStatsObservationsResult;
 import org.lareferencia.core.service.validation.ValidationStatsResult;
 
@@ -37,6 +36,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ArrayList;
 
+import org.lareferencia.dashboard.security.ISecurityService;
 import org.lareferencia.dashboard.service.IValidationInformationService;
 import org.lareferencia.dashboard.service.ValidationInformationServiceException;
 import org.lareferencia.dashboard.service.ValueCount;
@@ -46,7 +46,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -61,14 +60,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @RestController
 @Tag(name = "Validation", description = "Validation Information")
 @RequestMapping("/api/v2/validation/source")
-@CrossOrigin
 public class ValidationInformationController {
 
 	@Autowired
 	IValidationInformationService vService;
 
 	@Autowired
-	IValidationStatisticsService validationService;
+	ISecurityService securityService;
 
 	@Operation(summary = "Returns validation results info by harvesting id")
 	@ApiResponses(value = {
@@ -79,6 +77,7 @@ public class ValidationInformationController {
 			@Parameter(description = "Harvesting ID", required = true, example = "1") @PathVariable("harvestingID") Long harvestingID) {
 
 		ValidationStatsResult result = null;
+		securityService.checkSourceAccess(sourceAcronym);
 
 		try {
 
@@ -103,14 +102,16 @@ public class ValidationInformationController {
 			@Parameter(description = "Page number", example = "0") @RequestParam(value = "pageNumber", required = false, defaultValue = "0") Integer page,
 			@Parameter(description = "Page size", example = "20") @RequestParam(value = "pageSize", required = false, defaultValue = "20") Integer size) {
 
+		securityService.checkSourceAccess(networkAcronym);
 		try {
 
 			// Preparar filtros
 			List<String> queryFilters = filters != null ? filters : new ArrayList<>();
 
-			// Consultar observaciones usando la nueva API
-			ValidationStatsObservationsResult result = validationService.queryValidationStatsObservationsBySnapshotID(
-					harvestingID, queryFilters, PageRequest.of(page, size));
+			// Query through the dashboard service so snapshot/network correspondence is
+			// validated before accessing validation data.
+			ValidationStatsObservationsResult result = vService.queryValidationStatsObservations(
+					networkAcronym, harvestingID, queryFilters, PageRequest.of(page, size));
 
 			return new ResponseEntity<>(result, HttpStatus.OK);
 
@@ -137,6 +138,7 @@ public class ValidationInformationController {
 	) {
 
 		Page<IRecordValidationResult> result = null;
+		securityService.checkSourceAccess(sourceAcronym);
 
 		try {
 			result = vService.recordValidationResultsByHarvestingID(sourceAcronym, harvestingID,
@@ -162,6 +164,7 @@ public class ValidationInformationController {
 			@Parameter(description = "Rule ID", required = true, example = "1") @PathVariable("ruleID") Long ruleID) {
 
 		List<ValueCount> result = null;
+		securityService.checkSourceAccess(sourceAcronym);
 
 		try {
 			result = vService.validOccurrenceCountByHarvestingIDAndRuleID(sourceAcronym, harvestingID, ruleID);
@@ -181,6 +184,7 @@ public class ValidationInformationController {
 			@PathVariable("ruleID") Long ruleID) throws ValidationInformationServiceException {
 
 		List<ValueCount> result = null;
+		securityService.checkSourceAccess(sourceAcronym);
 
 		try {
 			result = vService.invalidOccurrenceCountByHarvestingIDAndRuleID(sourceAcronym, harvestingID, ruleID);

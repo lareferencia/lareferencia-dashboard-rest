@@ -1,11 +1,10 @@
 
 package org.lareferencia.dashboard.controller;
 
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.lareferencia.dashboard.security.ISecurityService;
 import org.lareferencia.dashboard.security.IUserManagementService;
 
 import org.springframework.http.HttpEntity;
@@ -13,12 +12,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,17 +23,18 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.Valid;
 
 @RestController
 @Tag(name = "Security", description = "User Management")
 @RequestMapping("/api/v2/security/management/")
-@CrossOrigin
 public class UserManagementController {
 
-  @Autowired
+	@Autowired
 	IUserManagementService uService;
+
+	@Autowired
+	ISecurityService securityService;
  
   @Operation(summary = "Returns a list of regular (non-admin) users")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Returns a list of regular users") })
@@ -60,7 +58,7 @@ public class UserManagementController {
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Returns a user's info") })
 	@RequestMapping(value = "/user/self/{username}", method = RequestMethod.GET)
 	HttpEntity<Map<String, String>> getUserInfo(@PathVariable("username") String username) {
-    
+		securityService.checkSelfAccess(username);
     Map<String, String> result = uService.getUserInfo(username);
 		return new ResponseEntity<Map<String, String>>(result, HttpStatus.OK);
 	}
@@ -78,17 +76,19 @@ public class UserManagementController {
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Updates a user's info") })
 	@RequestMapping(value = "/user/self/{username}/update", method = RequestMethod.PUT, consumes = {MediaType.APPLICATION_JSON_VALUE})
 	HttpEntity<Boolean> updateUser(@PathVariable("username") String username, @RequestBody Map<String, String> userInfo) {
-    
+		securityService.checkSelfAccess(username);
     Boolean result = uService.updateUser(username, userInfo);
 		return new ResponseEntity<Boolean>(result, HttpStatus.OK);
 	}
  
   @Operation(summary = "Changes a user's password")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Changes a user's password") })
-	@RequestMapping(value = "/user/self/{username}/reset_password", method = RequestMethod.PUT)
-	HttpEntity<Boolean> changePassword(@PathVariable("username") String username, @RequestParam(value = "newPassword", required = true) String newPassword) {
-    
-    Boolean result = uService.changePassword(username, newPassword);
+	@RequestMapping(value = "/user/self/{username}/reset_password", method = RequestMethod.PUT,
+			consumes = {MediaType.APPLICATION_JSON_VALUE})
+	HttpEntity<Boolean> changePassword(@PathVariable("username") String username,
+			@Valid @RequestBody PasswordChangeRequest passwordChange) {
+		securityService.checkSelfAccess(username);
+		Boolean result = uService.changePassword(username, passwordChange.newPassword());
 		return new ResponseEntity<Boolean>(result, HttpStatus.OK);
 	}
  

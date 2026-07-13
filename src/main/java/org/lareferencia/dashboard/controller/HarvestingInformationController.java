@@ -22,56 +22,43 @@
  *******************************************************************************/
 package org.lareferencia.dashboard.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lareferencia.core.service.validation.ValidationStatsObservationsResult;
 import org.lareferencia.dashboard.security.ISecurityService;
 import org.lareferencia.dashboard.service.HarvesterInfoServiceException;
 import org.lareferencia.dashboard.service.IHarvestingInformationService;
 import org.lareferencia.dashboard.service.IHarvestingResult;
 import org.lareferencia.dashboard.service.IHarvestingSource;
-import org.lareferencia.dashboard.service.impl.v3.HarvestingInformationService;
 import org.lareferencia.core.util.date.DateHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springdoc.core.annotations.ParameterObject;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
 
 @RestController
 @Tag(name = "Harvesting", description = "Harvesting Information")
 @RequestMapping("/api/v2/harvesting/source/")
-@CrossOrigin
 public class HarvestingInformationController {
 
 	private static Logger logger = LogManager.getLogger(HarvestingInformationController.class);
 
 	@Autowired
 	IHarvestingInformationService hService;
-
-	@Autowired
-	HttpServletRequest request;
 
 	@Autowired
 	ISecurityService securityService;
@@ -88,11 +75,11 @@ public class HarvestingInformationController {
 		Page<IHarvestingSource> result = null;
 
 		// if its a admin request show all sources
-		if (securityService.isAdminRequest(request)) {
+		if (securityService.isCurrentUserAdmin()) {
 			result = hService.listSources(pageable);
 		} else { // else get the groups of this user and return a filtered source list using
 					// groups as whitelist
-			result = hService.listSources(securityService.getRequestGroups(request), pageable);
+			result = hService.listSources(securityService.getCurrentUserGroups(), pageable);
 		}
 
 		return new ResponseEntity<Page<IHarvestingSource>>(result, HttpStatus.OK);
@@ -117,6 +104,7 @@ public class HarvestingInformationController {
 	HttpEntity<IHarvestingSource> getSourceByAcronym(@PathVariable("sourceAcronym") String sourceAcronym)
 			throws HarvesterInfoServiceException {
 
+		securityService.checkSourceAccess(sourceAcronym);
 		IHarvestingSource result = hService.getSourceByAcronym(sourceAcronym);
 
 		return new ResponseEntity<IHarvestingSource>(result, HttpStatus.OK);
@@ -147,6 +135,7 @@ public class HarvestingInformationController {
 			@PathVariable("sourceAcronym") String sourceAcronym, @ParameterObject Pageable pageable)
 			throws HarvesterInfoServiceException {
 
+		securityService.checkSourceAccess(sourceAcronym);
 		try {
 			Page<IHarvestingResult> result = hService.getHarvestingHistoryBySourceAcronym(sourceAcronym, pageable);
 			return new ResponseEntity<Page<IHarvestingResult>>(result, HttpStatus.OK);
@@ -170,6 +159,7 @@ public class HarvestingInformationController {
 			@PathVariable("endDate") String toDate, @ParameterObject Pageable pageable)
 	{
 
+		securityService.checkSourceAccess(sourceAcronym);
 		// converts from dates to localdatetime at the start and end of the given dates
 		LocalDateTime startDate = dateHelper.parseDate(fromDate).toLocalDate().atStartOfDay();
 		LocalDateTime endDate = dateHelper.parseDate(toDate).toLocalDate().atTime(LocalTime.MAX);
@@ -212,6 +202,7 @@ public class HarvestingInformationController {
 	HttpEntity<IHarvestingResult> getLGKSnapshotBySourceAcronym(@PathVariable("sourceAcronym") String sourceAcronym)
 			throws HarvesterInfoServiceException {
 
+		securityService.checkSourceAccess(sourceAcronym);
 		IHarvestingResult result = hService.getLastKnownGoodSHarvestingBySourceAcronym(sourceAcronym);
 
 		return new ResponseEntity<IHarvestingResult>(result, HttpStatus.OK);

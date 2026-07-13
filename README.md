@@ -6,6 +6,24 @@ RESTful API providing monitoring, statistics, and administrative data for dashbo
 
 Exposes endpoints for network statistics, repository monitoring, harvest event tracking, validation statistics, quality indicators, and OA Broker event management.
 
+## Authentication
+
+The API is a stateless OAuth2 resource server. Every `/api/v2/**` request must
+include a Keycloak-issued bearer token. Configure at least:
+
+```properties
+spring.security.oauth2.resourceserver.jwt.issuer-uri=https://auth.example/realms/example
+security.jwt.audience=dashboard-api
+security.cors.allowed-origins=https://dashboard.example
+```
+
+Realm roles are read from `realm_access.roles`; source access is restricted
+using the `groups` claim. The expected roles are `dashboard-user` and
+`dashboard-admin`.
+
+The Keycloak Admin API integration is independent from request authentication
+and can be disabled with `user-mgmt.enabled=false`.
+
 ## 📄 License
 
 Licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.  

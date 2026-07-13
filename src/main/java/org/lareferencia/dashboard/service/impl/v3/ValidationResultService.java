@@ -69,6 +69,27 @@ public class ValidationResultService implements IValidationInformationService {
 		}
 	}
 
+	@Override
+	public ValidationStatsObservationsResult queryValidationStatsObservations(String networkAcronym,
+			Long snapshotID, List<String> filters, Pageable pageable)
+			throws ValidationInformationServiceException {
+
+		obtainNetworkSnapshotAndCheckAcronymCorrespondece(networkAcronym, snapshotID);
+
+		try {
+			return validationService.queryValidationStatsObservationsBySnapshotID(
+					snapshotID, filters != null ? filters : new ArrayList<>(), pageable);
+		} catch (ValidationStatisticsException e) {
+			logger.error("Error querying validation observations: " + e.getMessage(), e);
+			throw new ValidationInformationServiceException(
+					"Error retrieving validation observations: " + e.getMessage());
+		} catch (Exception e) {
+			logger.error("Unexpected error querying validation observations: " + e.getMessage(), e);
+			throw new ValidationInformationServiceException(
+					"Unexpected error retrieving validation observations: " + e.getMessage());
+		}
+	}
+
 	/**
 	 * Obtains paginated record validation results using the core-lib API
 	 */

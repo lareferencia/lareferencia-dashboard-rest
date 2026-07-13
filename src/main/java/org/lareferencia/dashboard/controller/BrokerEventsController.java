@@ -24,6 +24,7 @@ package org.lareferencia.dashboard.controller;
 
 import java.util.Optional;
 
+import org.lareferencia.dashboard.security.ISecurityService;
 import org.lareferencia.dashboard.service.impl.v3.BrokerEventsService;
 import org.lareferencia.core.oabroker.BrokerEvent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -47,12 +47,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @RestController
 @Tag(name = "OpenAIRE Broker", description = "OpenAIRE Broker Events")
 @RequestMapping("/api/v2/oabroker/source/")
-@CrossOrigin
 public class BrokerEventsController {
 
 
 	@Autowired
 	BrokerEventsService brokerService;
+
+	@Autowired
+	ISecurityService securityService;
 	
 
 	@Operation(summary = "Returns broker events by source")
@@ -66,6 +68,7 @@ public class BrokerEventsController {
 		
 		
 		Page<BrokerEvent> result = null;
+		securityService.checkSourceAccess(sourceAcronym);
 
 		try {
 	
