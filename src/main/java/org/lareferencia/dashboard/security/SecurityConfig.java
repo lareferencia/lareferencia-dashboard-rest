@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -13,6 +15,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -30,6 +34,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 public class SecurityConfig {
+	private static final Logger logger = LogManager.getLogger(SecurityConfig.class);
 
 	@Bean
 	SecurityFilterChain securityFilterChain(
@@ -45,6 +50,7 @@ public class SecurityConfig {
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
 		if (!keycloakEnabled) {
+			logger.debug("Security configured in legacy no-Keycloak mode");
 			http.authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll());
 			return http.build();
 		}
@@ -63,11 +69,22 @@ public class SecurityConfig {
 						.anyRequest().denyAll())
 				.oauth2ResourceServer(oauth2 -> oauth2
 						.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter))
-						.authenticationEntryPoint((request, response, exception) ->
-								writeError(response, HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")))
+						.authenticationEntryPoint((request, response, exception) -> {
+							logger.debug("Authentication rejected: method={}, path={}, exception={}, reason={}",
+									request.getMethod(), request.getRequestURI(),
+									exception.getClass().getSimpleName(), exception.getMessage());
+							writeError(response, HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+						}))
 				.exceptionHandling(exceptions -> exceptions
-						.accessDeniedHandler((request, response, exception) ->
-								writeError(response, HttpServletResponse.SC_FORBIDDEN, "Forbidden")));
+						.accessDeniedHandler((request, response, exception) -> {
+							Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+							logger.debug("Authorization denied: method={}, path={}, principal={}, authorities={}, reason={}",
+									request.getMethod(), request.getRequestURI(),
+									authentication == null ? "anonymous" : authentication.getName(),
+									authentication == null ? List.of() : authentication.getAuthorities(),
+									exception.getMessage());
+							writeError(response, HttpServletResponse.SC_FORBIDDEN, "Forbidden");
+						}));
 
 		return http.build();
 	}
@@ -90,6 +107,8 @@ public class SecurityConfig {
 			boolean verifyAudience) {
 
 		String issuer = resolveIssuer(configuredIssuer, keycloakServerUrl, realm);
+		logger.debug("Configuring JWT validation: issuer={}, verifyAudience={}, expectedAudience={}",
+				issuer, verifyAudience, audience == null || audience.isBlank() ? "<not configured>" : audience);
 		NimbusJwtDecoder decoder = (NimbusJwtDecoder) JwtDecoders.fromIssuerLocation(issuer);
 		decoder.setJwtValidator(createJwtValidator(issuer, audience, verifyAudience));
 

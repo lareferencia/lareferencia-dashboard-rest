@@ -11,6 +11,8 @@ import java.util.Objects;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
@@ -22,6 +24,7 @@ import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
 public class KeycloakAdmin {
+	private static final Logger logger = LogManager.getLogger(KeycloakAdmin.class);
 
 	private static final long TOKEN_EXPIRY_THRESHOLD = 60;
 	private String realm;
@@ -43,11 +46,15 @@ public class KeycloakAdmin {
 				.build();
 
 		tokenResponse = keycloak.tokenManager().getAccessToken();
+		logger.debug("Keycloak Admin client initialized: serverUrl={}, realm={}, clientId={}, tokenExpiresIn={}",
+				serverUrl, realm, clientId, tokenResponse.getExpiresIn());
 
 	}
 
 	private void refreshTokenIfNeeded() {
 		if (tokenResponse.getExpiresIn() < TOKEN_EXPIRY_THRESHOLD) {
+			logger.debug("Refreshing Keycloak Admin access token: realm={}, expiresIn={}",
+					realm, tokenResponse.getExpiresIn());
 			this.tokenResponse = keycloak.tokenManager().refreshToken();
 		}
 	}
@@ -59,6 +66,8 @@ public class KeycloakAdmin {
 
 		UserRepresentation user = buildUserRepresentation(userInfo, userAttributes, false);
 		Response response = keycloak.realm(realm).users().create(user);
+		logger.debug("Keycloak create-user completed: username={}, status={}",
+				userInfo.get("username"), response.getStatus());
 
 		// Si la creación fue exitosa, agregar roles por defecto
 		if (response.getStatus() == 201) {
@@ -76,8 +85,8 @@ public class KeycloakAdmin {
 					
 					keycloak.realm(realm).users().get(userId).roles().realmLevel().add(roles);
 				} catch (Exception e) {
-					// Log error but don't fail the user creation
-					System.err.println("Error adding default roles to user: " + e.getMessage());
+					logger.warn("User was created but default roles could not be assigned: username={}",
+							username, e);
 				}
 			}
 		}
@@ -141,7 +150,9 @@ public class KeycloakAdmin {
 
 		refreshTokenIfNeeded();
 
-		return keycloak.realm(realm).users().delete(getUserId(username));
+		Response response = keycloak.realm(realm).users().delete(getUserId(username));
+		logger.debug("Keycloak delete-user completed: username={}, status={}", username, response.getStatus());
+		return response;
 	}
 
 	public List<String> listUsers(String roleName) {
@@ -153,6 +164,7 @@ public class KeycloakAdmin {
 		List<UserRepresentation> users = roleResource.getUserMembers();
 
 		users.forEach(user -> usernames.add(user.getUsername()));
+		logger.debug("Keycloak users listed: role={}, count={}", roleName, usernames.size());
 
 		return usernames;
 	}
@@ -268,10 +280,13 @@ public class KeycloakAdmin {
 																							// return more than one user
 
 		for (UserRepresentation user : users) {
-			if (user.getUsername().equals(username))
+			if (user.getUsername().equals(username)) {
+				logger.debug("Keycloak user resolved: username={}, searchMatches={}", username, users.size());
 				return user.getId();
+			}
 		}
 
+		logger.debug("Keycloak user not found: username={}, searchMatches={}", username, users.size());
 		return null;
 	}
 

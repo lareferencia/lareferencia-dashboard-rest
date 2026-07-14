@@ -40,6 +40,20 @@ Existing v4 installations can keep their previous configuration unchanged:
 The no-Keycloak mode exposes all dashboard data and should only be used where
 that was already the intended deployment policy.
 
+### Security diagnostics
+
+Enable focused authentication and user-management diagnostics without logging
+JWT values, passwords or client secrets:
+
+```properties
+logging.level.org.lareferencia.dashboard.security=DEBUG
+logging.level.org.lareferencia.dashboard.controller.UserManagementController=DEBUG
+```
+
+The resulting logs show JWT validation settings, authentication failures,
+principals, mapped authorities, groups, authorization denials and user/group
+management operation names. Disable these levels again after troubleshooting.
+
 ## 📄 License
 
 Licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.  

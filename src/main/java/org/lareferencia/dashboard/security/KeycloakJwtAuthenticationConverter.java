@@ -5,6 +5,8 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -14,6 +16,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 
 /** Converts Keycloak realm roles and OAuth scopes to Spring authorities. */
 public class KeycloakJwtAuthenticationConverter implements Converter<Jwt, JwtAuthenticationToken> {
+	private static final Logger logger = LogManager.getLogger(KeycloakJwtAuthenticationConverter.class);
 
 	private final JwtGrantedAuthoritiesConverter scopeConverter = new JwtGrantedAuthoritiesConverter();
 
@@ -26,6 +29,10 @@ public class KeycloakJwtAuthenticationConverter implements Converter<Jwt, JwtAut
 		if (principalName == null || principalName.isBlank()) {
 			principalName = jwt.getSubject();
 		}
+
+		logger.debug("JWT identity converted: principal={}, subject={}, issuer={}, audiences={}, authorities={}, groups={}",
+				principalName, jwt.getSubject(), jwt.getIssuer(), jwt.getAudience(), authorities,
+				jwt.getClaims().getOrDefault("groups", Set.of()));
 
 		return new JwtAuthenticationToken(jwt, authorities, principalName);
 	}

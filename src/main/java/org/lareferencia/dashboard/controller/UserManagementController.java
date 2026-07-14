@@ -4,6 +4,8 @@ package org.lareferencia.dashboard.controller;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.lareferencia.dashboard.security.ISecurityService;
 import org.lareferencia.dashboard.security.IUserManagementService;
 
@@ -29,6 +31,7 @@ import jakarta.validation.Valid;
 @Tag(name = "Security", description = "User Management")
 @RequestMapping("/api/v2/security/management/")
 public class UserManagementController {
+	private static final Logger logger = LogManager.getLogger(UserManagementController.class);
 
 	@Autowired
 	IUserManagementService uService;
@@ -40,7 +43,7 @@ public class UserManagementController {
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Returns a list of regular users") })
 	@RequestMapping(value = "/user/admin/list", method = RequestMethod.GET)
 	HttpEntity<List<String>> listUsers() {
-    
+		debugOperation("list-users", null);
     List<String> result = uService.listUsers();
 		return new ResponseEntity<List<String>>(result, HttpStatus.OK);
 	}
@@ -49,7 +52,7 @@ public class UserManagementController {
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Creates a new user with the given user info") })
 	@RequestMapping(value = "/user/admin/create", method = RequestMethod.POST, consumes = {MediaType.APPLICATION_JSON_VALUE})
 	HttpEntity<Boolean> createUser(@RequestBody Map<String, String> userInfo) {
-
+		debugOperation("create-user", userInfo.get("username"));
     Boolean result = uService.createUser(userInfo);
 		return new ResponseEntity<Boolean>(result, HttpStatus.OK);
 	}
@@ -58,6 +61,7 @@ public class UserManagementController {
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Returns a user's info") })
 	@RequestMapping(value = "/user/self/{username}", method = RequestMethod.GET)
 	HttpEntity<Map<String, String>> getUserInfo(@PathVariable("username") String username) {
+		debugOperation("get-user", username);
 		securityService.checkSelfAccess(username);
     Map<String, String> result = uService.getUserInfo(username);
 		return new ResponseEntity<Map<String, String>>(result, HttpStatus.OK);
@@ -67,7 +71,7 @@ public class UserManagementController {
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Lists a user's groups") })
 	@RequestMapping(value = "/user/admin/{username}/groups", method = RequestMethod.GET)
 	HttpEntity<List<String>> getUserGroups(@PathVariable("username") String username) {
-    
+		debugOperation("get-user-groups", username);
     List<String> result = uService.getUserGroups(username);
 		return new ResponseEntity<List<String>>(result, HttpStatus.OK);
 	}
@@ -76,6 +80,7 @@ public class UserManagementController {
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Updates a user's info") })
 	@RequestMapping(value = "/user/self/{username}/update", method = RequestMethod.PUT, consumes = {MediaType.APPLICATION_JSON_VALUE})
 	HttpEntity<Boolean> updateUser(@PathVariable("username") String username, @RequestBody Map<String, String> userInfo) {
+		debugOperation("update-user", username);
 		securityService.checkSelfAccess(username);
     Boolean result = uService.updateUser(username, userInfo);
 		return new ResponseEntity<Boolean>(result, HttpStatus.OK);
@@ -87,6 +92,7 @@ public class UserManagementController {
 			consumes = {MediaType.APPLICATION_JSON_VALUE})
 	HttpEntity<Boolean> changePassword(@PathVariable("username") String username,
 			@Valid @RequestBody PasswordChangeRequest passwordChange) {
+		debugOperation("change-password", username);
 		securityService.checkSelfAccess(username);
 		Boolean result = uService.changePassword(username, passwordChange.newPassword());
 		return new ResponseEntity<Boolean>(result, HttpStatus.OK);
@@ -96,7 +102,7 @@ public class UserManagementController {
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Adds a user to a group") })
 	@RequestMapping(value = "/user/admin/{username}/add_to_group/{groupname}", method = RequestMethod.PUT)
 	HttpEntity<Boolean> addUserToGroup(@PathVariable("username") String username, @PathVariable("groupname") String groupname) {
-    
+		debugOperation("add-user-to-group", username + " -> " + groupname);
     Boolean result = uService.addUserToGroup(username, groupname);
 		return new ResponseEntity<Boolean>(result, HttpStatus.OK);
 	}
@@ -105,7 +111,7 @@ public class UserManagementController {
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Adds a user to a group") })
 	@RequestMapping(value = "/user/admin/{username}/remove_from_group/{groupname}", method = RequestMethod.DELETE)
 	HttpEntity<Boolean> removeUserFromGroup(@PathVariable("username") String username, @PathVariable("groupname") String groupname) {
-    
+		debugOperation("remove-user-from-group", username + " -> " + groupname);
     Boolean result = uService.removeUserFromGroup(username, groupname);
 		return new ResponseEntity<Boolean>(result, HttpStatus.OK);
 	}
@@ -114,7 +120,7 @@ public class UserManagementController {
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Deletes a user") })
 	@RequestMapping(value = "/user/admin/{username}/delete", method = RequestMethod.DELETE)
 	HttpEntity<Boolean> deleteUser(@PathVariable("username") String username) {
-    
+		debugOperation("delete-user", username);
     Boolean result = uService.deleteUser(username);
 		return new ResponseEntity<Boolean>(result, HttpStatus.OK);
 	}
@@ -123,7 +129,7 @@ public class UserManagementController {
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Returns a list of groups") })
 	@RequestMapping(value = "/group/admin/list", method = RequestMethod.GET)
 	HttpEntity<List<String>> listGroups() {
-    
+		debugOperation("list-groups", null);
     List<String> result = uService.listGroups();
 		return new ResponseEntity<List<String>>(result, HttpStatus.OK);
 	}
@@ -132,7 +138,7 @@ public class UserManagementController {
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Creates a new group with the given group info") })
 	@RequestMapping(value = "/group/admin/create", method = RequestMethod.POST, consumes = {MediaType.APPLICATION_JSON_VALUE})
 	HttpEntity<Boolean> createGroup(@RequestBody Map<String, String> groupInfo) {
-    
+		debugOperation("create-group", groupInfo.get("name"));
     Boolean result = uService.createGroup(groupInfo);
 		return new ResponseEntity<Boolean>(result, HttpStatus.OK);
 	}
@@ -141,7 +147,7 @@ public class UserManagementController {
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Returns a group's info") })
 	@RequestMapping(value = "/group/admin/{groupname}", method = RequestMethod.GET)
 	HttpEntity<Map<String, String>> getGroupInfo(@PathVariable("groupname") String groupname) {
-    
+		debugOperation("get-group", groupname);
     Map<String, String> result = uService.getGroupInfo(groupname);
 		return new ResponseEntity<Map<String, String>>(result, HttpStatus.OK);
 	}
@@ -150,7 +156,7 @@ public class UserManagementController {
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Lists a group's members") })
 	@RequestMapping(value = "/group/admin/{groupname}/members", method = RequestMethod.GET)
 	HttpEntity<List<String>> getGroupMembers(@PathVariable("groupname") String groupname) {
-    
+		debugOperation("get-group-members", groupname);
     List<String> result = uService.getGroupMembers(groupname);
 		return new ResponseEntity<List<String>>(result, HttpStatus.OK);
 	}
@@ -159,7 +165,7 @@ public class UserManagementController {
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Updates a group's info") })
 	@RequestMapping(value = "/group/admin/{groupname}/update", method = RequestMethod.PUT, consumes = {MediaType.APPLICATION_JSON_VALUE})
 	HttpEntity<Boolean> updateGroup(@PathVariable("groupname") String groupname, @RequestBody Map<String, String> groupInfo) {
-    
+		debugOperation("update-group", groupname);
     Boolean result = uService.updateGroup(groupname, groupInfo);
 		return new ResponseEntity<Boolean>(result, HttpStatus.OK);
 	}
@@ -168,10 +174,17 @@ public class UserManagementController {
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Deletes a group") })
 	@RequestMapping(value = "/group/admin/{groupname}/delete", method = RequestMethod.DELETE)
 	HttpEntity<Boolean> deleteGroup(@PathVariable("groupname") String groupname) {
-    
+		debugOperation("delete-group", groupname);
     Boolean result = uService.deleteGroup(groupname);
 		return new ResponseEntity<Boolean>(result, HttpStatus.OK);
 	}
  
+	private void debugOperation(String operation, String target) {
+		if (!logger.isDebugEnabled()) {
+			return;
+		}
 
+		logger.debug("User management operation: operation={}, actor={}, target={}",
+				operation, securityService.getCurrentUsername(), target == null ? "<none>" : target);
+	}
 }
