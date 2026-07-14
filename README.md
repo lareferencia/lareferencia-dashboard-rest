@@ -23,7 +23,9 @@ using the `groups` claim. The expected roles are `dashboard-user` and
 `dashboard-admin`.
 
 The Keycloak Admin API integration is independent from request authentication
-and can be disabled with `user-mgmt.enabled=false`.
+and is enabled by default for compatibility with the Angular administration
+module. It can be disabled with `user-mgmt.enabled=false`; in that mode user and
+group operations intentionally return empty or false results.
 
 ### Legacy client compatibility
 

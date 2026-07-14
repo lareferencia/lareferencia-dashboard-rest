@@ -4,12 +4,22 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.annotation.PostConstruct;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Service;
 
 @Service
 @ConditionalOnExpression("'${user-mgmt.enabled:${keycloak.enabled:true}}' == 'false'")
 public class NoKeycloakUserManagementService implements IUserManagementService {
+	private static final Logger logger = LogManager.getLogger(NoKeycloakUserManagementService.class);
+
+	@PostConstruct
+	void logDisabledIntegration() {
+		logger.debug("Keycloak Admin integration is disabled; user-management operations return empty or false results");
+	}
 
     @Override
     public Boolean createUser(Map<String, String> infoMap) {
@@ -49,7 +59,7 @@ public class NoKeycloakUserManagementService implements IUserManagementService {
 
     @Override
     public List<String> listUsers() {
-        // Return empty list when Keycloak is disabled
+		logger.debug("User list requested while Keycloak Admin integration is disabled; returning an empty list");
         return Collections.emptyList();
     }
 
@@ -85,7 +95,7 @@ public class NoKeycloakUserManagementService implements IUserManagementService {
 
     @Override
     public List<String> listGroups() {
-        // Return empty list when Keycloak is disabled
+		logger.debug("Group list requested while Keycloak Admin integration is disabled; returning an empty list");
         return Collections.emptyList();
     }
 

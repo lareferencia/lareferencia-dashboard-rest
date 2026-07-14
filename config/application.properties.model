@@ -97,8 +97,8 @@ keycloak.realm=lareferencia
 # Keycloak client ID
 keycloak.resource=dashboard-lareferencia-api
 
-# Keycloak client secret
-keycloak.credentials.secret=[OAUTH_CLIENT_SECRET]
+# Dummy Keycloak API client secret. Replace before deployment.
+keycloak.credentials.secret=DUMMY_API_CLIENT_SECRET_CHANGE_ME
 
 # Master authentication switch, retained for compatibility with v4 clients.
 # true: require JWT authentication. false: expose the API as in the legacy
@@ -118,11 +118,12 @@ security.cors.allowed-origins=http://localhost:4200
 
 # User management properties
 user-mgmt.client-id=admin-cli
-user-mgmt.client-secret=[OAUTH_CLIENT_SECRET]
+# Dummy Keycloak Admin client secret. Replace before enabling user management.
+user-mgmt.client-secret=DUMMY_ADMIN_CLIENT_SECRET_CHANGE_ME
 
 # Overrides the Keycloak Admin API integration independently. When omitted, it
 # follows keycloak.enabled for compatibility with previous configurations.
-user-mgmt.enabled=false
+user-mgmt.enabled=true
 
 
 # ==============================================================================
