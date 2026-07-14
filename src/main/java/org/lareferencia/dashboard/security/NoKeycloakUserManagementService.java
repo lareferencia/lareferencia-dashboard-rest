@@ -4,11 +4,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Service;
 
 @Service
-@ConditionalOnProperty(name = "user-mgmt.enabled", havingValue = "false")
+@ConditionalOnExpression("'${user-mgmt.enabled:${keycloak.enabled:true}}' == 'false'")
 public class NoKeycloakUserManagementService implements IUserManagementService {
 
     @Override

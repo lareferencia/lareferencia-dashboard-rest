@@ -18,8 +18,11 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.data.web.config.EnableSpringDataWebSupport.PageSerializationMode;
 
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 
 @SpringBootApplication
 @ComponentScan(basePackages = { "org.lareferencia.dashboard", "org.lareferencia.app.dashboard",
@@ -54,11 +57,18 @@ public class DashboardApplication {
 
         /**
          * SpringDoc OpenAPI configuration (replacement for Springfox Swagger)
-	 * Swagger UI will be available at: http://localhost:${server.port}/swagger-ui.html
+         * Swagger UI will be available at: http://localhost:${server.port}/swagger-ui.html
          */
         @Bean
         public OpenAPI customOpenAPI() {
                 return new OpenAPI()
+                                .components(new Components()
+                                                .addSecuritySchemes("bearerAuth", new SecurityScheme()
+                                                                .type(SecurityScheme.Type.HTTP)
+                                                                .scheme("bearer")
+                                                                .bearerFormat("JWT")
+                                                                .description("JWT issued by the configured Keycloak realm")))
+                                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
                                 .info(new Info()
                                                 .title(enviroment.getProperty("rest.lareferencia.metadata.title",
                                                                 "LA Referencia Dashboard API"))

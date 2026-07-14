@@ -7,11 +7,11 @@ import java.util.Map;
 import jakarta.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Service;
 
 @Service
-@ConditionalOnProperty(name = "user-mgmt.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnExpression("'${user-mgmt.enabled:${keycloak.enabled:true}}' == 'true'")
 public class KeycloakUserManagementService implements IUserManagementService {
 
   @Value("${keycloak.auth-server-url}")

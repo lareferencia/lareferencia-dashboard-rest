@@ -100,11 +100,18 @@ keycloak.resource=dashboard-lareferencia-api
 # Keycloak client secret
 keycloak.credentials.secret=[OAUTH_CLIENT_SECRET]
 
+# Master authentication switch, retained for compatibility with v4 clients.
+# true: require JWT authentication. false: expose the API as in the legacy
+# no-Keycloak mode. Use false only behind an appropriately protected network.
+keycloak.enabled=true
+
 # JWT issuer used by Spring Security resource server
 spring.security.oauth2.resourceserver.jwt.issuer-uri=https://auth.lareferencia.info/realms/lareferencia
 
-# Required JWT audience. Usually this is the API client ID.
+# API audience and optional strict validation. The previous Keycloak adapter did
+# not verify token audience by default, so keep this false for existing clients.
 security.jwt.audience=dashboard-lareferencia-api
+security.jwt.verify-audience=false
 
 # Comma-separated browser origins allowed to call the API
 security.cors.allowed-origins=http://localhost:4200
@@ -113,8 +120,8 @@ security.cors.allowed-origins=http://localhost:4200
 user-mgmt.client-id=admin-cli
 user-mgmt.client-secret=[OAUTH_CLIENT_SECRET]
 
-# Disable only the Keycloak Admin API integration in local environments.
-# JWT authentication remains mandatory for all API endpoints.
+# Overrides the Keycloak Admin API integration independently. When omitted, it
+# follows keycloak.enabled for compatibility with previous configurations.
 user-mgmt.enabled=false
 
 

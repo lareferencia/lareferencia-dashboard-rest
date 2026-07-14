@@ -18,6 +18,7 @@ import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtDecoders;
+import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -34,14 +35,21 @@ public class SecurityConfig {
 	SecurityFilterChain securityFilterChain(
 			HttpSecurity http,
 			KeycloakJwtAuthenticationConverter jwtAuthenticationConverter,
+			@Value("${keycloak.enabled:true}") boolean keycloakEnabled,
 			@Value("${authz.admin-role:dashboard-admin}") String adminRole,
 			@Value("${authz.user-role:dashboard-user}") String userRole) throws Exception {
 
 		http
 				.csrf(csrf -> csrf.disable())
 				.cors(cors -> { })
-				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.authorizeHttpRequests(authorize -> authorize
+				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+		if (!keycloakEnabled) {
+			http.authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll());
+			return http.build();
+		}
+
+		http.authorizeHttpRequests(authorize -> authorize
 						.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 						.requestMatchers("/error").permitAll()
 						.requestMatchers("/", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**")
@@ -71,34 +79,54 @@ public class SecurityConfig {
 
 	@Bean
 	@ConditionalOnMissingBean(JwtDecoder.class)
-	@ConditionalOnProperty(name = "security.jwt.decoder.enabled", havingValue = "true", matchIfMissing = true)
+	@ConditionalOnProperty(name = { "keycloak.enabled", "security.jwt.decoder.enabled" },
+			havingValue = "true", matchIfMissing = true)
 	JwtDecoder jwtDecoder(
 			@Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri:}") String configuredIssuer,
 			@Value("${keycloak.auth-server-url:}") String keycloakServerUrl,
 			@Value("${keycloak.realm:}") String realm,
-			@Value("${security.jwt.audience:${keycloak.resource:}}") String audience) {
+			@Value("${security.jwt.audience:}") String audience,
+			@Value("${security.jwt.verify-audience:${keycloak.verify-token-audience:false}}")
+			boolean verifyAudience) {
 
 		String issuer = resolveIssuer(configuredIssuer, keycloakServerUrl, realm);
 		NimbusJwtDecoder decoder = (NimbusJwtDecoder) JwtDecoders.fromIssuerLocation(issuer);
-		OAuth2TokenValidator<Jwt> issuerValidator = JwtValidators.createDefaultWithIssuer(issuer);
-
-		if (audience == null || audience.isBlank()) {
-			decoder.setJwtValidator(issuerValidator);
-		} else {
-			decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(
-					issuerValidator, new AudienceValidator(audience)));
-		}
+		decoder.setJwtValidator(createJwtValidator(issuer, audience, verifyAudience));
 
 		return decoder;
 	}
 
+	static OAuth2TokenValidator<Jwt> createJwtValidator(
+			String issuer, String audience, boolean verifyAudience) {
+		OAuth2TokenValidator<Jwt> issuerValidator = JwtValidators.createDefaultWithIssuer(issuer);
+
+		if (!verifyAudience || audience == null || audience.isBlank()) {
+			return issuerValidator;
+		}
+
+		return new DelegatingOAuth2TokenValidator<>(
+				issuerValidator, new AudienceValidator(audience));
+	}
+
+	@Bean
+	@ConditionalOnMissingBean(JwtDecoder.class)
+	@ConditionalOnProperty(name = "keycloak.enabled", havingValue = "false")
+	JwtDecoder legacyDisabledJwtDecoder() {
+		return token -> {
+			throw new JwtException("JWT decoding is disabled because keycloak.enabled=false");
+		};
+	}
+
 	@Bean
 	CorsConfigurationSource corsConfigurationSource(
-			@Value("${security.cors.allowed-origins:}") String allowedOrigins) {
+			@Value("${security.cors.allowed-origins:*}") String allowedOrigins,
+			@Value("${keycloak.enabled:true}") boolean keycloakEnabled) {
 		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOrigins(splitCommaSeparated(allowedOrigins));
+		configuration.setAllowedOrigins(keycloakEnabled
+				? splitCommaSeparated(allowedOrigins)
+				: List.of("*"));
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-		configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+		configuration.setAllowedHeaders(List.of("*"));
 		configuration.setExposedHeaders(List.of("WWW-Authenticate"));
 		configuration.setAllowCredentials(false);
 		configuration.setMaxAge(3600L);
