@@ -54,7 +54,7 @@ public class DashboardApplication {
 
         /**
          * SpringDoc OpenAPI configuration (replacement for Springfox Swagger)
-         * Swagger UI will be available at: http://localhost:8092/swagger-ui.html
+	 * Swagger UI will be available at: http://localhost:${server.port}/swagger-ui.html
          */
         @Bean
         public OpenAPI customOpenAPI() {

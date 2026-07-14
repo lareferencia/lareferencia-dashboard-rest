@@ -44,14 +44,14 @@ public class SecurityConfig {
 				.authorizeHttpRequests(authorize -> authorize
 						.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 						.requestMatchers("/error").permitAll()
+						.requestMatchers("/", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**")
+						.permitAll()
 						.requestMatchers(
 								"/api/v2/security/management/user/admin/**",
 								"/api/v2/security/management/group/admin/**")
 						.hasRole(adminRole)
 						.requestMatchers("/api/v2/security/management/user/self/**").authenticated()
 						.requestMatchers("/api/v2/**").hasAnyRole(userRole, adminRole)
-						.requestMatchers("/", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**")
-						.hasRole(adminRole)
 						.anyRequest().denyAll())
 				.oauth2ResourceServer(oauth2 -> oauth2
 						.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter))
